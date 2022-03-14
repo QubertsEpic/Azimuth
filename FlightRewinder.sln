@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightRewinder", "FlightRewinder\FlightRewinder.csproj", "{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimConnectWrapper", "SimConnectWrapper\SimConnectWrapper.csproj", "{C252C2A8-14DB-469F-BC69-BF0C8FAB266B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C252C2A8-14DB-469F-BC69-BF0C8FAB266B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C252C2A8-14DB-469F-BC69-BF0C8FAB266B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C252C2A8-14DB-469F-BC69-BF0C8FAB266B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C252C2A8-14DB-469F-BC69-BF0C8FAB266B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {128E7FF0-14CE-4144-A406-5028F84D6644}
+	EndGlobalSection
+EndGlobal
