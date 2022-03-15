@@ -1,5 +1,5 @@
 ﻿using Microsoft.FlightSimulator.SimConnect;
-using SimConnectWrapper.Core.Structs;
+using SimConnectWrapper.Core.SimEventArgs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +10,12 @@ namespace SimConnectWrapper.Core
 {
     public class Connection
     {
-        internal enum Definitions : uint
-        {
-            PositionStruct
-        }
-
-        public enum Requests
-        {
-            Position
-        }
-
         public SimConnect? instance;
 
         public event EventHandler? Initialised;
         public event EventHandler? Quit;
         public event EventHandler? FrameEvent;
-        public event EventHandler? LocationChanged;
+        public event EventHandler<LocationChangedEventArgs>? LocationChanged;
 
         const int WM_USER_SIMCONNECT = 0x0402;
 
@@ -41,7 +31,6 @@ namespace SimConnectWrapper.Core
             instance.OnRecvQuit += new SimConnect.RecvQuitEventHandler(Connection_OnQuit);
 
             instance.OnRecvException += Instance_OnRecvException;
-            instance.OnRecvEvent += Instance_OnRecvEvent;
             instance.OnRecvSimobjectData += Instance_OnRecvSimobjectData;
             instance.OnRecvEventFrame += Instance_OnRecvEventFrame;
             PrepareData();
@@ -51,10 +40,34 @@ namespace SimConnectWrapper.Core
 
         private void Instance_OnRecvEventFrame(SimConnect sender, SIMCONNECT_RECV_EVENT_FRAME data)
         {
+            FrameEvent?.Invoke(this, new());
         }
 
         private void Instance_OnRecvSimobjectData(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA data)
         {
+            if (data.dwRequestID == ((uint)Enumerators.Requests.Position))
+            {
+                var position = data.dwData[0] as Structs.PositionStruct?;
+                if (position.HasValue)
+                {
+                    AircraftPositionUpdate(position.Value);
+                }
+            }
+        }
+
+        public void HandleEvents(int msg, ref bool handled)
+        {
+            if (msg == WM_USER_SIMCONNECT)
+            {
+                if (instance != null)
+                    instance.ReceiveMessage();
+            }
+        }
+
+        public void AircraftPositionUpdate(Structs.PositionStruct posStruct)
+        {
+            Console.WriteLine("Position Change");
+            LocationChanged?.Invoke(this, new LocationChangedEventArgs(posStruct));
         }
 
         private void Instance_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT data)
@@ -91,11 +104,13 @@ namespace SimConnectWrapper.Core
             if (instance == null)
                 return;
 
-            instance.AddToDataDefinition(Definitions.PositionStruct, "PLANE ALTITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            
+            instance.AddToDataDefinition(Enumerators.Definitions.PositionStruct, "PLANE ALTITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            instance.AddToDataDefinition(Enumerators.Definitions.PositionStruct, "PLANE LONGITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            instance.AddToDataDefinition(Enumerators.Definitions.PositionStruct, "PLANE LATITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+
             //Going to add more soon.
-            
-            instance.RegisterDataDefineStruct<Structs.PositionStruct>(Definitions.PositionStruct);
+
+            instance.RegisterDataDefineStruct<Structs.PositionStruct>(Enumerators.Definitions.PositionStruct);
         }
     }
 }
