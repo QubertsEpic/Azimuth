@@ -11,5 +11,6 @@ namespace SimConnectWrapper.Core.Structs
     public struct PositionStruct
     {
         public double Altitude;
+        //Unfinished.
     }
 }
