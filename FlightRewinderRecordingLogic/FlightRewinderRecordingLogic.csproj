@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlightRewinder\FlightRewinderData.csproj" />
+    <ProjectReference Include="..\SimConnectWrapper\SimConnectWrapper.csproj" />
   </ItemGroup>
 
 </Project>

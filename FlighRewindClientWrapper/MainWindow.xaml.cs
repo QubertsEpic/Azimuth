@@ -77,10 +77,26 @@ namespace FlighRewindClientWrapper
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _simConnection = new Connection();
+            _recorder = new Recorder();
             Handle = new WindowInteropHelper(this).Handle;
             var handleHook = HwndSource.FromHwnd(Handle);
             handleHook.AddHook(HandleHook);
             Connect();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            _recorder?.StartRecording();
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

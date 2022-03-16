@@ -116,6 +116,10 @@ namespace SimConnectWrapper.Core
             Console.WriteLine("Connected To " + data.szApplicationName);
         }
 
+        public void SetData(Enum definition, uint objectID, object data)
+        {
+            instance?.SetDataOnSimObject(definition, objectID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, data);
+        }
         public void AddToDataDefinition<T>(Enum definition, params (string name, string unit, SIMCONNECT_DATATYPE dataType)[] objects)
         {
             if (objects == null)
