@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightRewinder", "FlightRewinder\FlightRewinder.csproj", "{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightRewinderData", "FlightRewinder\FlightRewinderData.csproj", "{53D18ADF-EE1D-4AB0-918B-1F16BC61E792}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimConnectWrapper", "SimConnectWrapper\SimConnectWrapper.csproj", "{C252C2A8-14DB-469F-BC69-BF0C8FAB266B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlighRewindClientWrapper", "FlighRewindClientWrapper\FlighRewindClientWrapper.csproj", "{F416C342-0605-454A-A249-59E1B5A88FB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlighRewindClientWrapper", "FlighRewindClientWrapper\FlighRewindClientWrapper.csproj", "{F416C342-0605-454A-A249-59E1B5A88FB8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightRewinderRecordingLogic", "FlightRewinderRecordingLogic\FlightRewinderRecordingLogic.csproj", "{6A42F80E-3FF5-4E53-B62C-211148CC95FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,14 @@ Global
 		{F416C342-0605-454A-A249-59E1B5A88FB8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F416C342-0605-454A-A249-59E1B5A88FB8}.Release|x64.ActiveCfg = Release|x64
 		{F416C342-0605-454A-A249-59E1B5A88FB8}.Release|x64.Build.0 = Release|x64
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Debug|x64.ActiveCfg = Debug|x64
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Debug|x64.Build.0 = Debug|x64
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|x64.ActiveCfg = Release|Any CPU
+		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

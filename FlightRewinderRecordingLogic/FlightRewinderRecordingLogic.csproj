@@ -11,10 +11,4 @@
     <ProjectReference Include="..\FlightRewinder\FlightRewinderData.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Microsoft.FlightSimulator.SimConnect">
-      <HintPath>..\..\..\..\..\..\MSFS SDK\SimConnect SDK\lib\managed\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

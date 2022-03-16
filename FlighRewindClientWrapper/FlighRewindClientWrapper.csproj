@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FlightRewinderRecordingLogic\FlightRewinderRecordingLogic.csproj" />
     <ProjectReference Include="..\SimConnectWrapper\SimConnectWrapper.csproj" />
   </ItemGroup>
 

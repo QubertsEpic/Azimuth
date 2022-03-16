@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlightRewinderData.Structs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,11 @@ namespace SimConnectWrapper.Core.SimEventArgs
 {
     public class LocationChangedEventArgs : EventArgs
     {
-        public LocationChangedEventArgs(Structs.PositionStruct position)
+        public LocationChangedEventArgs(PositionStruct position)
         {
             Position = position;
         }
 
-        public Structs.PositionStruct Position;
+        public PositionStruct Position;
     }
 }

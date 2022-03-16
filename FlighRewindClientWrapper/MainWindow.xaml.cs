@@ -1,20 +1,10 @@
-﻿using SimConnectWrapper.Core;
+﻿using FlightRewinderRecordingLogic;
+using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FlighRewindClientWrapper
 {
@@ -23,24 +13,18 @@ namespace FlighRewindClientWrapper
     /// </summary>
     public partial class MainWindow : Window
     {
-        public Connection _simConnection;
+        Connection? _simConnection;
+        Recorder? _recorder;
+        IntPtr Handle;
         public MainWindow()
         {
-            InitializeComponent();   
-            _simConnection = new Connection();
-            _simConnection.Initialised += _simConnection_Initialised;
+            InitializeComponent();
         }
 
         private void _simConnection_Initialised(object? sender, EventArgs e)
         {
             DefaultTextBlock.Text = "Connected.";
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            _simConnection.ManualDataRequest();
-        }
-
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             if (_simConnection == null)
@@ -60,13 +44,43 @@ namespace FlighRewindClientWrapper
         {
             try
             {
-                _simConnection.HandleEvents(msg, ref handled);
+                _simConnection?.HandleEvents(msg, ref handled);
                 return IntPtr.Zero;
             }
             catch (Exception)
             {
                 return IntPtr.Zero;
             }
+        }
+
+        public void Connect()
+        {
+            if (_simConnection == null)
+                throw new NullReferenceException("Cannot connect to simconnect.");
+            try
+            {
+                _simConnection.Initialise(Handle);
+                _simConnection.LocationChanged += _simConnection_LocationChanged;
+            }
+            catch (COMException)
+            {
+                Console.WriteLine("Failed to connect to SimConnect!");
+                return;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _simConnection = new Connection();
+            Handle = new WindowInteropHelper(this).Handle;
+            var handleHook = HwndSource.FromHwnd(Handle);
+            handleHook.AddHook(HandleHook);
+            Connect();
         }
     }
 }
