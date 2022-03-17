@@ -1,30 +1,38 @@
 ﻿using FlightRewinderData.Classes;
 using FlightRewinderData.DataEventArgs;
 using FlightRewinderData.Structs;
+using SimConnectWrapper.Core;
+using SimConnectWrapper.Core.SimEventArgs;
 using System.Diagnostics;
 
 namespace FlightRewinderRecordingLogic
 {
     public class Recorder
     {
+        public event EventHandler<RecorderUpdatedEventArgs>? RecorderUpdated;
+        
         public uint? MaxFrames;
         public List<RecordedFrame>? ListOfFrames;
         public Stopwatch watch = new Stopwatch();
-        public bool? Recording = false;
-        public event EventHandler<RecorderUpdatedEventArgs>? RecorderUpdated;
+        public bool Recording;
 
-        private long PreviousFrame;
+        private long StartingTime;
+        private long EndingTime;
+        private Connection connectionInstance;
 
-        public Recorder()
+        public Recorder(Connection connection)
         {
+            connectionInstance = connection;
+            watch.Restart();
         }
 
         public void StartRecording()
         {
             ListOfFrames = new List<RecordedFrame>();
+            EndingTime = -1;
+            StartingTime = watch.ElapsedMilliseconds;
             Recording = true;
-            watch.Start();
-            PreviousFrame = watch.ElapsedMilliseconds;
+            connectionInstance.LocationChanged += OnLocationUpdated;
         }
 
         /// <summary>
@@ -35,9 +43,8 @@ namespace FlightRewinderRecordingLogic
             if (ListOfFrames == null)
                 throw new InvalidOperationException("Recording hasn't started.");
             long currentFrame = watch.ElapsedMilliseconds;
-            var nextFrame = new RecordedFrame(postion, watch.ElapsedMilliseconds - PreviousFrame);
+            var nextFrame = new RecordedFrame(postion, watch.ElapsedMilliseconds);
             ListOfFrames.Add(nextFrame);
-            PreviousFrame = currentFrame;
             RecorderUpdated?.Invoke(this, new(nextFrame));
         }
 
@@ -47,19 +54,29 @@ namespace FlightRewinderRecordingLogic
                 throw new IndexOutOfRangeException("Cannot access index to make modifications.");
             if (ListOfFrames != null)
             {
-                if (index + 1 != ListOfFrames.Count && correctDeltaTime == true)
-                {
-                    ListOfFrames[index + 1].deltaTime += ListOfFrames[index].deltaTime;
-                }
                 ListOfFrames.RemoveAt(index);
             }
         }
 
-        public List<RecordedFrame> DumpData()
+        private void OnLocationUpdated(object? sender, LocationChangedEventArgs args)
+        {
+            if (EndingTime > -1)
+                throw new InvalidOperationException("Not Recording.");
+            RecordFrame(args.Position);
+        }
+
+        public void StopRecording()
+        {
+            EndingTime = watch.ElapsedMilliseconds;
+            Recording = false;
+            connectionInstance.LocationChanged -= OnLocationUpdated;
+        }
+
+        public SaveData DumpData()
         {
             if (ListOfFrames == null)
                 throw new NullReferenceException("Recording invalid.");
-            return ListOfFrames;
+            return new SaveData("Title", StartingTime, EndingTime, ListOfFrames);
         }
     }
 }

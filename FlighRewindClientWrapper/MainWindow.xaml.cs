@@ -1,7 +1,9 @@
-﻿using FlightRewinderRecordingLogic;
+﻿using FlightRewinderData.Classes;
+using FlightRewinderRecordingLogic;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -77,7 +79,7 @@ namespace FlighRewindClientWrapper
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _simConnection = new Connection();
-            _recorder = new Recorder();
+            _recorder = new Recorder(_simConnection);
             Handle = new WindowInteropHelper(this).Handle;
             var handleHook = HwndSource.FromHwnd(Handle);
             handleHook.AddHook(HandleHook);
@@ -91,12 +93,16 @@ namespace FlighRewindClientWrapper
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-
+            _recorder?.StopRecording();
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-
+            var data = _recorder?.DumpData();
+            FileStream steram = File.Create("Cool.txt");
+            StreamWriter writer = new StreamWriter(steram);
+            writer.Write(SaveData.ToJson(data));
+            steram.Flush();
         }
     }
 }
