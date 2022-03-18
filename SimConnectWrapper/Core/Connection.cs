@@ -1,4 +1,5 @@
 ﻿using FlightRewinderData.Enums;
+using FlightRewinderData.StructAttributes;
 using FlightRewinderData.Structs;
 using Microsoft.FlightSimulator.SimConnect;
 using SimConnectWrapper.Core.SimEventArgs;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SimConnectWrapper.Core
 {
-    public class Connection
+    public partial class Connection
     {
         public SimConnect? instance;
         public bool Alive;
@@ -85,7 +86,7 @@ namespace SimConnectWrapper.Core
             switch (data.dwException)
             {
                 case ((uint)SIMCONNECT_EXCEPTION.ILLEGAL_OPERATION):
-                    
+
                     break;
             }
         }
@@ -108,7 +109,7 @@ namespace SimConnectWrapper.Core
             {
                 Console.WriteLine("An error has occurred.");
             }
-            Alive = false;        
+            Alive = false;
         }
 
         private void Connection_OnOpen(SimConnect sender, SIMCONNECT_RECV_OPEN data)
@@ -131,25 +132,30 @@ namespace SimConnectWrapper.Core
             instance?.RegisterDataDefineStruct<T>(definition);
         }
 
+        public void AddToDataDefinition<T>(Enum definition, List<DefinitionAttribute> arrays)
+        {
+            if (arrays == null)
+                throw new ArgumentNullException(nameof(arrays), "Cannot use null arrays.");
+            foreach (var obj in arrays)
+            {
+                instance?.AddToDataDefinition(definition, obj.VariableName, obj.Unit, obj.DataType, 0, SimConnect.SIMCONNECT_UNUSED);
+            }
+            instance?.RegisterDataDefineStruct<T>(definition);
+        }
+
         public void StartDataTransfer()
         {
             if (instance == null)
                 throw new NullReferenceException("Cannott use null sim connect instance.");
-            instance.RequestDataOnSimObject(Requests.PlaneLocation, Definitions.LocationStruct, 0, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0,0,0);
+            instance.RequestDataOnSimObject(Requests.PlaneLocation, Definitions.LocationStruct, 0, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
         }
 
         public void PrepareData()
         {
             if (instance == null)
                 return;
+            List<DefinitionAttribute> attributes = PositionStruct.GetAllAttributes();
 
-            instance.AddToDataDefinition(Definitions.LocationStruct, "PLANE ALTITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            instance.AddToDataDefinition(Definitions.LocationStruct, "PLANE LONGITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            instance.AddToDataDefinition(Definitions.LocationStruct, "PLANE LATITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-
-            //Going to add more soon.
-
-            instance.RegisterDataDefineStruct<PositionStruct>(Definitions.LocationStruct);
         }
     }
 }

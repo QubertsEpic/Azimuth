@@ -1,10 +1,14 @@
 ﻿using FlightRewinderData.Classes;
+using FlightRewinderData.StructAttributes;
+using FlightRewinderData.Structs;
 using FlightRewinderRecordingLogic;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -18,6 +22,7 @@ namespace FlighRewindClientWrapper
         Connection? _simConnection;
         Recorder? _recorder;
         IntPtr Handle;
+        int index = 0;
         public MainWindow()
         {
             InitializeComponent();
