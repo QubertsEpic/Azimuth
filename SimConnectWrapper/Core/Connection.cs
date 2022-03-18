@@ -155,7 +155,7 @@ namespace SimConnectWrapper.Core
             if (instance == null)
                 return;
             List<DefinitionAttribute> attributes = PositionStruct.GetAllAttributes();
-
+            AddToDataDefinition<PositionStruct>(Definitions.LocationStruct, attributes);
         }
     }
 }
