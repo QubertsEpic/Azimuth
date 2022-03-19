@@ -7,7 +7,7 @@ namespace FlightRewinderData.Structs
     [StructLayout(LayoutKind.Sequential)]
     public struct PositionStruct
     {
-        [DefinitionAttribute("PLANE ALTITUDE","feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Altitude;
         [DefinitionAttribute("PLANE LONGITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Longitude;
@@ -16,7 +16,7 @@ namespace FlightRewinderData.Structs
 
         [DefinitionAttribute("PLANE BANK DEGREES", "Radians", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Bank;
-        [DefinitionAttribute("PLANE PITCH DEGREES","Radians", SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE PITCH DEGREES", "Radians", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Pitch;
         [DefinitionAttribute("PLANE HEADING DEGREES TRUE", "Radians", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Heading;
@@ -24,11 +24,11 @@ namespace FlightRewinderData.Structs
         [DefinitionAttribute("GENERAL ENG THROTTLE LEVER POSITION:1", "percent", SIMCONNECT_DATATYPE.FLOAT64)]
         public int Throttle;
 
-        [DefinitionAttribute("PLANE ALTITUDE","feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public int FlapsPosition;
-        [DefinitionAttribute("PLANE ALTITUDE","feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public int SpoilerHandlePosition;
-        [DefinitionAttribute("PLANE ALTITUDE","feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public int GearHandlePosition;
 
         [DefinitionAttribute("VELOCITY BODY X", "feet/second", SIMCONNECT_DATATYPE.FLOAT64)]
@@ -40,20 +40,16 @@ namespace FlightRewinderData.Structs
         [DefinitionAttribute("VELOCITY BODY Z", "feet/second", SIMCONNECT_DATATYPE.FLOAT64)]
         public double VelocityZ;
 
-    
+
         public static List<DefinitionAttribute> GetAllAttributes()
         {
             List<DefinitionAttribute> attributes = new List<DefinitionAttribute>();
-            foreach(var value in typeof(PositionStruct).GetFields())
+            foreach (var value in typeof(PositionStruct).GetFields())
             {
-                object[] customAttributes = value.GetCustomAttributes(true);
-                for(int i = 0; i < customAttributes.Length; i++)
+                DefinitionAttribute[] customAttributes = (DefinitionAttribute[])value.GetCustomAttributes(typeof(DefinitionAttribute), true);
+                for (int i = 0; i < customAttributes.Length; i++)
                 {
-                    if(customAttributes[i] is DefinitionAttribute def)
-                    {
-                        attributes.Add(def);
-                        break;
-                    }
+                    attributes.Add(customAttributes[i]);
                 }
             }
             return attributes;
