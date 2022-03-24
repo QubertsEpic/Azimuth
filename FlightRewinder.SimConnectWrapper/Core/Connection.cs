@@ -1,4 +1,5 @@
-﻿using FlightRewinderData.Enums;
+﻿using FlightRewinder.Data.Enums;
+using FlightRewinderData.Enums;
 using FlightRewinderData.StructAttributes;
 using FlightRewinderData.Structs;
 using Microsoft.FlightSimulator.SimConnect;
@@ -15,6 +16,8 @@ namespace SimConnectWrapper.Core
     {
         public SimConnect? instance;
         public bool Alive;
+        public uint RequestCount = 0;
+        public static readonly uint UserPlane = SimConnect.SIMCONNECT_OBJECT_ID_USER;
 
         public event EventHandler? Initialised;
         public event EventHandler? Quit;
@@ -22,6 +25,7 @@ namespace SimConnectWrapper.Core
         public event EventHandler<LocationChangedEventArgs>? LocationChanged;
 
         const int WM_USER_SIMCONNECT = 0x0402;
+
 
         public Connection()
         {
@@ -39,6 +43,8 @@ namespace SimConnectWrapper.Core
             instance.OnRecvSimobjectData += Instance_OnRecvSimobjectData;
             instance.OnRecvEventFrame += Instance_OnRecvEventFrame;
             PrepareData();
+
+            instance.SubscribeToSystemEvent(Events.FRAME, "Frame");
 
             StartDataTransfer();
 
@@ -116,11 +122,63 @@ namespace SimConnectWrapper.Core
         {
             Console.WriteLine("Connected To " + data.szApplicationName);
         }
-
-        public void SetData(Enum definition, uint objectID, object data)
+        /// <summary>
+        /// Creates an AI Aircraft that can be modified. Returns the aircraft ID.
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public uint CreatePlane(string title, PositionStruct position)
         {
-            instance?.SetDataOnSimObject(definition, objectID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, data);
+            var request = Requests.CreatePlane + RequestCount;
+            RequestCount = (RequestCount++) % 10000;
+            try
+            {
+                SIMCONNECT_DATA_INITPOSITION initPosition = new SIMCONNECT_DATA_INITPOSITION()
+                {
+                    Altitude = position.Altitude,
+                    Longitude = position.Longitude,
+                    Latitude = position.Latitude,
+                    Bank = position.Bank,
+                    Heading = position.Heading,
+                    Pitch = position.Pitch,
+                };
+                instance?.AICreateNonATCAircraft(title, "Rewind", initPosition, request);
+                return RequestCount;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e.Message);
+                throw;
+            }
         }
+
+        public void SetData(uint aircraftID, Enum definition, object dataToSet)
+        {
+            try
+            {
+                instance?.SetDataOnSimObject(definition, aircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, dataToSet);
+            } 
+            catch (Exception)
+            {
+                Console.WriteLine("Error while setting data.");
+                return;
+            }
+        }
+
+        public void RemovePlane(uint aircraftID)
+        {
+            try
+            {
+                instance?.AIRemoveObject(aircraftID, Requests.RemovePlane);
+            }
+            catch (Exception) 
+            {
+                Console.WriteLine("Error while removing plane, possibly missing aircraftID");
+                return;
+            }
+        }
+
         public void AddToDataDefinition<T>(Enum definition, params (string name, string unit, SIMCONNECT_DATATYPE dataType)[] objects)
         {
             if (objects == null)
@@ -156,6 +214,7 @@ namespace SimConnectWrapper.Core
                 return;
             List<DefinitionAttribute> attributes = PositionStruct.GetAllAttributes();
             AddToDataDefinition<PositionStruct>(Definitions.LocationStruct, attributes);
+            AddToDataDefinition<PositionStruct>(Definitions.SetLocation, attributes);
         }
     }
 }

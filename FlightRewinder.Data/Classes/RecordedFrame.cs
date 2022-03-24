@@ -10,11 +10,11 @@ namespace FlightRewinderData.Classes
     public class RecordedFrame
     {
         public PositionStruct Position;
-        public long DeltaTime;
+        public long Time;
         public RecordedFrame(PositionStruct position, long deltaTime)
         {
             Position = position;
-            this.DeltaTime = deltaTime;
+            this.Time = deltaTime;
         }
     }
 }

@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace FlightRewinderData.Enums
 {
-    public enum Definitions
+    public enum Requests : uint
     {
-        LocationStruct
+        PlaneLocation = 0,
+        RemovePlane = 1,
+        CreatePlane = 10000,
     }
 }

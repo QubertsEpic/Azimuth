@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace FlightRewinderData.Enums
 {
-    public enum Requests
+    public enum Definitions
     {
-        PlaneLocation
+        LocationStruct,
+        SetLocation
     }
 }

@@ -10,19 +10,21 @@ namespace FlightRewinderRecordingLogic
     public class Recorder
     {
         public event EventHandler<RecorderUpdatedEventArgs>? RecorderUpdated;
-        
+
         public uint? MaxFrames;
         public List<RecordedFrame>? ListOfFrames;
         public Stopwatch watch = new Stopwatch();
-        public bool Recording;
+        public bool Recording => EndingTime < 0 && StartingTime != 0;
 
         private long StartingTime;
         private long EndingTime;
         private Connection connectionInstance;
 
-        public Recorder(Connection connection)
+
+        public Recorder(Connection connection, uint maxFrames = 2000)
         {
             connectionInstance = connection;
+            MaxFrames = maxFrames;
             watch.Restart();
         }
 
@@ -31,7 +33,6 @@ namespace FlightRewinderRecordingLogic
             ListOfFrames = new List<RecordedFrame>();
             EndingTime = -1;
             StartingTime = watch.ElapsedMilliseconds;
-            Recording = true;
             connectionInstance.LocationChanged += OnLocationUpdated;
         }
 
@@ -43,8 +44,11 @@ namespace FlightRewinderRecordingLogic
             if (ListOfFrames == null)
                 throw new InvalidOperationException("Recording hasn't started.");
             long currentFrame = watch.ElapsedMilliseconds;
-            var nextFrame = new RecordedFrame(postion, watch.ElapsedMilliseconds);
+            var nextFrame = new RecordedFrame(postion, currentFrame);
             ListOfFrames.Add(nextFrame);
+            //Check to see if too many frames have been recorded.
+            if (ListOfFrames.Count > MaxFrames)
+                RemoveFrame(ListOfFrames.Count-1);
             RecorderUpdated?.Invoke(this, new(nextFrame));
         }
 
@@ -60,7 +64,7 @@ namespace FlightRewinderRecordingLogic
 
         private void OnLocationUpdated(object? sender, LocationChangedEventArgs args)
         {
-            if (EndingTime > -1)
+            if (!Recording)
                 throw new InvalidOperationException("Not Recording.");
             RecordFrame(args.Position);
         }
@@ -68,7 +72,6 @@ namespace FlightRewinderRecordingLogic
         public void StopRecording()
         {
             EndingTime = watch.ElapsedMilliseconds;
-            Recording = false;
             connectionInstance.LocationChanged -= OnLocationUpdated;
         }
 

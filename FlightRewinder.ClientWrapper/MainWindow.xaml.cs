@@ -21,8 +21,8 @@ namespace FlighRewindClientWrapper
     {
         Connection? _simConnection;
         Recorder? _recorder;
+        Rewind? _rewinder;
         IntPtr Handle;
-        int index = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -38,6 +38,7 @@ namespace FlighRewindClientWrapper
                 _simConnection = new Connection();
             IntPtr handle = new WindowInteropHelper(this).Handle;
             _simConnection.LocationChanged += _simConnection_LocationChanged;
+            _simConnection.Initialised += _simConnection_Initialised;
             var handleSource = HwndSource.FromHwnd(handle);
             handleSource.AddHook(HandleHook);
             _simConnection.Initialise(handle);
@@ -80,11 +81,13 @@ namespace FlighRewindClientWrapper
                 throw;
             }
         }
+        //Make a method for rewinding, stop recording, dump the data and start playing it in reverse.
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _simConnection = new Connection();
             _recorder = new Recorder(_simConnection);
+            _rewinder = new Rewind(_simConnection);
             Handle = new WindowInteropHelper(this).Handle;
             var handleHook = HwndSource.FromHwnd(Handle);
             handleHook.AddHook(HandleHook);
@@ -103,11 +106,15 @@ namespace FlighRewindClientWrapper
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            var data = _recorder?.DumpData();
-            FileStream steram = File.Create("Cool.txt");
-            StreamWriter writer = new StreamWriter(steram);
-            writer.Write(SaveData.ToJson(data));
-            steram.Flush();
+            if (_recorder != null)
+            {
+                var data = _recorder.DumpData();
+                if (data?.Frames != null)
+                {
+                    _rewinder?.LoadData(data.Frames);
+                    _rewinder?.StartReplay(Connection.UserPlane);
+                }
+            }
         }
     }
 }
