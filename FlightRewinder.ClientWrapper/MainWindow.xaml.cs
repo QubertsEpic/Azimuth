@@ -75,10 +75,10 @@ namespace FlighRewindClientWrapper
                 Console.WriteLine("Failed to connect to SimConnect!");
                 return;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                throw;
+                DefaultTextBlock.Text = ex.Message;
+                return;
             }
         }
         //Make a method for rewinding, stop recording, dump the data and start playing it in reverse.

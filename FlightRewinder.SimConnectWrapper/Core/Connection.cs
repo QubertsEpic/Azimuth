@@ -15,7 +15,7 @@ namespace SimConnectWrapper.Core
     public partial class Connection
     {
         public SimConnect? instance;
-        public bool Alive;
+        public bool Alive => instance != null;
         public uint RequestCount = 0;
         public static readonly uint UserPlane = SimConnect.SIMCONNECT_OBJECT_ID_USER;
 
@@ -42,9 +42,10 @@ namespace SimConnectWrapper.Core
             instance.OnRecvException += Instance_OnRecvException;
             instance.OnRecvSimobjectData += Instance_OnRecvSimobjectData;
             instance.OnRecvEventFrame += Instance_OnRecvEventFrame;
-            PrepareData();
+            instance.AddToDataDefinition(Definitions.InitialPosition, "Initial Position", null, SIMCONNECT_DATATYPE.INITPOSITION, 0f, SimConnect.SIMCONNECT_UNUSED);
 
             instance.SubscribeToSystemEvent(Events.FRAME, "Frame");
+            PrepareData();
 
             StartDataTransfer();
 
@@ -97,6 +98,11 @@ namespace SimConnectWrapper.Core
             }
         }
 
+        public void Init(uint planeID, PositionStruct position)
+        {
+            instance?.SetDataOnSimObject(Definitions.InitialPosition, planeID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, PositionStruct.PosStructToInitPos(position));
+        }
+
         private void Connection_OnQuit(SimConnect sender, SIMCONNECT_RECV data)
         {
             Close();
@@ -115,7 +121,6 @@ namespace SimConnectWrapper.Core
             {
                 Console.WriteLine("An error has occurred.");
             }
-            Alive = false;
         }
 
         private void Connection_OnOpen(SimConnect sender, SIMCONNECT_RECV_OPEN data)

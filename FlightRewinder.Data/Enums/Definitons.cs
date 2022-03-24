@@ -9,6 +9,7 @@ namespace FlightRewinderData.Enums
     public enum Definitions
     {
         LocationStruct,
-        SetLocation
+        SetLocation,
+        InitialPosition
     }
 }

@@ -15,7 +15,7 @@ namespace FlightRewinderRecordingLogic
 
         public double RewindRate = 1;
         public uint PlaneID;
-        public int currentFrameIndex;
+        public int currentFrame;
         public long? PauseTime;
         public long? OffsetCorrection;
         public Stopwatch? Watch;
@@ -83,9 +83,15 @@ namespace FlightRewinderRecordingLogic
             if (RecordedFrames == null)
                 throw new NullReferenceException("Frames are not loaded.");
             Playing = true;
-            currentFrameIndex = -1;
+            PlaneID = planeID;
+            currentFrame = 0;
             OffsetCorrection = OffsetCorrection ?? 0;
             AddReferences();
+
+            if (RecordedFrames.Any())
+            {
+                Instance.Init(0, RecordedFrames[currentFrame].Position);
+            }
             Task.Run(StartReplaying);
         }
 
@@ -131,8 +137,7 @@ namespace FlightRewinderRecordingLogic
                     {
                         lastTime = frames.Current.Time;
                         frame = frames.Current;
-                        currentFrameIndex++;
-                        currentTime -= frames.Current.Time;
+                        currentFrame++;
                     }
                     else
                     {
@@ -151,7 +156,7 @@ namespace FlightRewinderRecordingLogic
         public void AbortReplay()
         {
             Watch = null;
-            currentFrameIndex = -1;
+            currentFrame = -1;
         }
 
         private void Tick()
