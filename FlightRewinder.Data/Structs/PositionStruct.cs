@@ -8,16 +8,16 @@ namespace FlightRewinderData.Structs
     [StructLayout(LayoutKind.Sequential)]
     public struct PositionStruct
     {
-        [DefinitionAttribute("PLANE ALTITUDE", UnitTypes.Radian, SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE ALTITUDE", UnitTypes.Foot, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Altitude;
-        [DefinitionAttribute("PLANE LONGITUDE", UnitTypes.Radian, SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE LONGITUDE", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Longitude;
-        [DefinitionAttribute("PLANE LATITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE LATITUDE", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Latitude;
 
-        [DefinitionAttribute("PLANE BANK DEGREES", UnitTypes.Radian, SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE BANK DEGREES", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Bank;
-        [DefinitionAttribute("PLANE PITCH DEGREES", UnitTypes.Radian, SIMCONNECT_DATATYPE.FLOAT64)]
+        [DefinitionAttribute("PLANE PITCH DEGREES", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Pitch;
         [DefinitionAttribute("PLANE HEADING DEGREES TRUE", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Heading;
@@ -46,17 +46,18 @@ namespace FlightRewinderData.Structs
 
         public static SIMCONNECT_DATA_INITPOSITION PosStructToInitPos(PositionStruct data)
         {
-            return new SIMCONNECT_DATA_INITPOSITION()
+            SIMCONNECT_DATA_INITPOSITION pos =  new SIMCONNECT_DATA_INITPOSITION()
             {
-                Airspeed = 0,
-                Bank = data.Bank,
-                Altitude = data.Altitude,
-                Heading = data.Heading,
                 Latitude = data.Latitude,
                 Longitude = data.Longitude,
+                Altitude = data.Altitude,
+                Pitch = data.Pitch,
+                Bank = data.Bank,
+                Heading = data.Heading,
                 OnGround = data.OnGround,
-                Pitch = data.Pitch
+                Airspeed = 0
             };
+            return pos;
         }
         public static List<DefinitionAttribute> GetAllAttributes()
         {

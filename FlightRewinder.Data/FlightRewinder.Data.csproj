@@ -9,6 +9,13 @@
 
   <ItemGroup>
     <None Remove="Libraries\SimConnect.dll" />
+    <None Remove="SimConnect.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SimConnect.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

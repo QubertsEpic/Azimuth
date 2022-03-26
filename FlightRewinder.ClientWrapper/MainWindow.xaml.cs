@@ -41,11 +41,12 @@ namespace FlighRewindClientWrapper
             _simConnection.Initialised += _simConnection_Initialised;
             var handleSource = HwndSource.FromHwnd(handle);
             handleSource.AddHook(HandleHook);
-            _simConnection.Initialise(handle);
+            Connect();
         }
 
         private void _simConnection_LocationChanged(object? sender, LocationChangedEventArgs e)
         {
+            DefaultTextBlock.Text = e.Position.Altitude.ToString();
         }
 
         private IntPtr HandleHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr iParam, ref bool handled)
@@ -73,6 +74,7 @@ namespace FlighRewindClientWrapper
             catch (COMException)
             {
                 Console.WriteLine("Failed to connect to SimConnect!");
+                DefaultTextBlock.Text = "Could not connect to Flight Simulator.";
                 return;
             }
             catch (Exception ex)

@@ -194,6 +194,6 @@ namespace FlightRewinderData.Classes
         public const string PIDStruct = "PID_STRUCT";
         public const string POIList = "POIList";
         public const string GlassCockpitSettings = "GlassCockpitSettings";
-        public const string FuelLevels = "FuelLevels"; 
+        public const string FuelLevels = "FuelLevels";
     }
 }

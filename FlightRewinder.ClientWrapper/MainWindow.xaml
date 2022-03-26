@@ -18,10 +18,10 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" x:Name="DefaultTextBlock" Text="Placeholder" FontSize="40px" Foreground="Black"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" x:Name="DefaultTextBlock" Text="Placeholder" FontSize="40px" Foreground="Black"/>
         <Button Grid.Row="1" Grid.Column="0" Content="Connect" Click="Button_Click_1"/>
         <Button Grid.Row="1" Grid.Column="1" Content="Record" Click="Button_Click"/>
         <Button Grid.Row="1" Grid.Column="2" Content="Stop Recording" Click="Button_Click_2"/>
-        <Button Grid.Row="1" Grid.Column="3" Content="Dump Data" Click="Button_Click_3"/>
+        <Button Grid.Row="1" Grid.Column="3" Content="Start Replay" Click="Button_Click_3"/>
     </Grid>
 </Window>
