@@ -94,7 +94,6 @@ namespace SimConnectWrapper.Core
 
         public void AircraftPositionUpdate(PositionStruct posStruct)
         {
-            Console.WriteLine("Position Change");
             LocationChanged?.Invoke(this, new LocationChangedEventArgs(posStruct));
         }
         private void Instance_OnRecvException(SimConnect sender, SIMCONNECT_RECV_EXCEPTION data)
@@ -156,18 +155,7 @@ namespace SimConnectWrapper.Core
                 RequestCount = (RequestCount++) % 10000;
                 try
                 {
-                    SIMCONNECT_DATA_INITPOSITION initPosition = new SIMCONNECT_DATA_INITPOSITION()
-                    {
-                        Altitude = position.Altitude,
-                        Longitude = position.Longitude,
-                        Latitude = position.Latitude,
-                        Bank = position.Bank,
-                        Heading = position.Heading,
-                        Pitch = position.Pitch,
-                        Airspeed = 0,
-                        OnGround = position.OnGround
-                    };
-                    instance?.AICreateNonATCAircraft(title, "Rewind", initPosition, request);
+                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStruct.PosStructToInitPos(position), request);
                     return RequestCount;
                 }
                 catch (Exception e)

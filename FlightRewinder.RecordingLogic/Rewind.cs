@@ -100,10 +100,9 @@ namespace FlightRewinderRecordingLogic
             Tick();
         }
 
-        private async void StartReplaying()
+        private async Task StartReplaying()
         {
             var frames = RecordedFrames.GetEnumerator();
-            bool craftMoved = true;
             RecordedFrame previousFrame;
             RecordedFrame frame = RecordedFrames[0];
             long lastTime = 0;
@@ -146,10 +145,7 @@ namespace FlightRewinderRecordingLogic
                     }
                 }
 
-                if (craftMoved)
-                {
-                    MoveCraft(frame);
-                }
+                MoveCraft(frame);
             }
         }
 
@@ -169,7 +165,7 @@ namespace FlightRewinderRecordingLogic
 
         public void MoveCraft(RecordedFrame newPosition)
         {
-            Instance.SetData(PlaneID, Definitions.SetLocation, newPosition.Position);
+            Instance.SetData(0, Definitions.SetLocation, newPosition.Position);
         }
     }
 }
