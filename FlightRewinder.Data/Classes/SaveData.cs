@@ -11,15 +11,11 @@ namespace FlightRewinderData.Classes
     public class SaveData
     {
         public string? Title;
-        public long? StartingTime;
-        public long? EndingTime;
         public List<RecordedFrame>? Frames;
         
-        public SaveData(string aircraftTitle, long startingTime, long endingTime, List<RecordedFrame> frames)
+        public SaveData(string aircraftTitle, List<RecordedFrame> frames)
         {
             Title = aircraftTitle;
-            StartingTime = startingTime;
-            EndingTime = endingTime;
             Frames = frames;
         }
 

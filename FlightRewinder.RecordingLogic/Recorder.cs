@@ -14,9 +14,8 @@ namespace FlightRewinderRecordingLogic
         public uint? MaxFrames;
         public List<RecordedFrame>? ListOfFrames;
         public Stopwatch watch = new Stopwatch();
-        public bool Recording => EndingTime < 0 && StartingTime != 0;
+        public bool Recording => EndingTime < 0;
 
-        private long StartingTime;
         private long EndingTime;
         private Connection connectionInstance;
 
@@ -25,14 +24,13 @@ namespace FlightRewinderRecordingLogic
         {
             connectionInstance = connection;
             MaxFrames = maxFrames;
-            watch.Restart();
         }
 
         public void StartRecording()
         {
             ListOfFrames = new List<RecordedFrame>();
             EndingTime = -1;
-            StartingTime = watch.ElapsedMilliseconds;
+            watch.Restart();
             connectionInstance.LocationChanged += OnLocationUpdated;
         }
 
@@ -79,7 +77,7 @@ namespace FlightRewinderRecordingLogic
         {
             if (ListOfFrames == null)
                 throw new NullReferenceException("Recording invalid.");
-            return new SaveData("Title", StartingTime, EndingTime, ListOfFrames);
+            return new SaveData("Title", ListOfFrames);
         }
     }
 }

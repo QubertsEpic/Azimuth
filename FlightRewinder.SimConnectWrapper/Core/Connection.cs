@@ -110,7 +110,7 @@ namespace SimConnectWrapper.Core
         {
             lock (lockObject)
             {
-                instance?.SetDataOnSimObject(Definitions.InitialPosition, planeID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, PositionStruct.PosStructToInitPos(position));
+                instance?.SetDataOnSimObject(Definitions.InitialPosition, planeID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, PositionStructHelper.PosStructToInitPos(position));
             }
         }
 
@@ -155,7 +155,7 @@ namespace SimConnectWrapper.Core
                 RequestCount = (RequestCount++) % 10000;
                 try
                 {
-                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStruct.PosStructToInitPos(position), request);
+                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStructHelper.PosStructToInitPos(position), request);
                     return RequestCount;
                 }
                 catch (Exception e)
@@ -242,9 +242,9 @@ namespace SimConnectWrapper.Core
             {
                 if (instance == null)
                     return;
-                List<DefinitionAttribute> attributes = PositionStruct.GetAllAttributes();
+                List<DefinitionAttribute> attributes = PositionStructHelper.GetAllAttributes();
                 AddToDataDefinition<PositionStruct>(Definitions.LocationStruct, attributes);
-                AddToDataDefinition<PositionStruct>(Definitions.SetLocation, attributes);
+                AddToDataDefinition<PositionSetStruct>(Definitions.SetLocation, attributes);
             }
         }
     }

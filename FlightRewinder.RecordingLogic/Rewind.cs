@@ -165,7 +165,7 @@ namespace FlightRewinderRecordingLogic
 
         public void MoveCraft(RecordedFrame newPosition)
         {
-            Instance.SetData(0, Definitions.SetLocation, newPosition.Position);
+            Instance.SetData(0, Definitions.SetLocation, PositionStructHelper.ToSet(newPosition.Position));
         }
     }
 }
