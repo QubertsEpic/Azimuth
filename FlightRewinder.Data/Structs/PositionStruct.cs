@@ -3,33 +3,12 @@ using FlightRewinderData.StructAttributes;
 using Microsoft.FlightSimulator.SimConnect;
 using System.Runtime.InteropServices;
 
-namespace FlightRewinderData.Structs
+namespace FlightRewinder.Structs
 {
  
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-    public struct PositionSetStruct
+    public partial struct PositionSetStruct
     {
-        public double Altitude;
-        public double Longitude;
-        public double Latitude;
-
-        public double Bank;
-        public double Pitch;
-        public double Heading;
-
-        public double Throttle;
-
-        public double FlapsPosition;
-        public double SpoilerHandlePosition;
-        public double GearHandlePosition;
-
-        public double VelocityX;
-
-        public double VelocityY;
-
-        public double VelocityZ;
-
-        public uint OnGround;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -78,55 +57,6 @@ namespace FlightRewinderData.Structs
 
     public class PositionStructHelper
     {
-        public static SIMCONNECT_DATA_INITPOSITION PosStructToInitPos(PositionStruct data)
-        {
-            SIMCONNECT_DATA_INITPOSITION pos = new SIMCONNECT_DATA_INITPOSITION()
-            {
-                Latitude = data.Latitude,
-                Longitude = data.Longitude,
-                Altitude = data.Altitude,
-                Pitch = data.Pitch,
-                Bank = data.Bank,
-                Heading = data.Heading,
-                OnGround = data.OnGround,
-                Airspeed = 0
-            };
-            return pos;
-        }
-
-        public static PositionSetStruct ToSet(PositionStruct posStruct)
-        {
-            return new PositionSetStruct()
-            {
-                Altitude = posStruct.Altitude,
-                Latitude = posStruct.Latitude,
-                Longitude = posStruct.Longitude,
-                Bank = posStruct.Bank,
-                FlapsPosition = posStruct.FlapsPosition,
-                GearHandlePosition = posStruct.GearHandlePosition,
-                Heading = posStruct.Heading,
-                OnGround = posStruct.OnGround,
-                Pitch = posStruct.Pitch,
-                SpoilerHandlePosition = posStruct.SpoilerHandlePosition,
-                Throttle = posStruct.Throttle,
-                VelocityX = posStruct.VelocityX,
-                VelocityY = posStruct.VelocityY,
-                VelocityZ = posStruct.VelocityZ
-            };
-        }
-
-        public static List<DefinitionAttribute> GetAllAttributes()
-        {
-            List<DefinitionAttribute> attributes = new List<DefinitionAttribute>();
-            foreach (var value in typeof(PositionStruct).GetFields())
-            {
-                DefinitionAttribute[] customAttributes = (DefinitionAttribute[])value.GetCustomAttributes(typeof(DefinitionAttribute), true);
-                for (int i = 0; i < customAttributes.Length; i++)
-                {
-                    attributes.Add(customAttributes[i]);
-                }
-            }
-            return attributes;
-        }
+        
     }
 }

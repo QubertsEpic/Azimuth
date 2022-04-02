@@ -1,4 +1,5 @@
-﻿using FlightRewinderData.Classes;
+﻿using FlightRewinder.Data.Structs;
+using FlightRewinderData.Classes;
 using FlightRewinderData.Enums;
 using FlightRewinderData.Structs;
 using SimConnectWrapper.Core;
@@ -21,7 +22,7 @@ namespace FlightRewinderRecordingLogic
         public Stopwatch? Watch;
 
         public bool Playing;
-        private bool Stopping;
+        private bool Stopping = false;
         public PositionStruct StartingPosition;
 
         private TaskCompletionSource<bool>? tick;
@@ -103,8 +104,8 @@ namespace FlightRewinderRecordingLogic
         private async Task StartReplaying()
         {
             var frames = RecordedFrames.GetEnumerator();
-            RecordedFrame previousFrame;
-            RecordedFrame frame = RecordedFrames[0];
+            RecordedFrame? previousFrame = null;
+            RecordedFrame? frame = null;
             long lastTime = 0;
             Watch = Stopwatch.StartNew();
             while (true)
@@ -144,8 +145,10 @@ namespace FlightRewinderRecordingLogic
                         return;
                     }
                 }
-
-                MoveCraft(frame);
+                if (frame != null)
+                {
+                    MoveCraft(frame);
+                }
             }
         }
 
@@ -165,7 +168,7 @@ namespace FlightRewinderRecordingLogic
 
         public void MoveCraft(RecordedFrame newPosition)
         {
-            Instance.SetData(0, Definitions.SetLocation, PositionStructHelper.ToSet(newPosition.Position));
+            Instance.SetData(0, Definitions.SetLocation, PositionStructOperators.ToSet(newPosition.Position));
         }
     }
 }
