@@ -1,6 +1,6 @@
-﻿using FlightRewinderData.Classes;
-using FlightRewinderData.DataEventArgs;
-using FlightRewinderData.Structs;
+﻿using FlightRewinder.Structs;
+using FlightRewinder.Classes;
+using FlightRewinder.DataEventArgs;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System.Diagnostics;
@@ -11,27 +11,66 @@ namespace FlightRewinderRecordingLogic
     {
         public event EventHandler<RecorderUpdatedEventArgs>? RecorderUpdated;
 
-        public uint? MaxFrames;
-        public List<RecordedFrame>? ListOfFrames;
-        public Stopwatch watch = new Stopwatch();
+        public List<RecordedFrame>? ListOfFrames = new List<RecordedFrame>();
+        public Stopwatch watch = Stopwatch.StartNew();
         public bool Recording => EndingTime < 0;
 
+        private bool linked = false;
+
         private long EndingTime;
+        private long PauseTime = 0;
+        private long OffsetCorrection = 0;
         private Connection connectionInstance;
 
 
-        public Recorder(Connection connection, uint maxFrames = 2000)
+        public Recorder(Connection connection)
         {
             connectionInstance = connection;
-            MaxFrames = maxFrames;
+        }
+
+        public void RestartRecording()
+        {
+            EndingTime = -1;
+            PauseTime = 0;
+            OffsetCorrection = 0;
+            watch.Restart();
+            StartRecording();
+        }
+
+        public void ChangeEvents(bool add)
+        {
+            if (add)
+            {
+                if(!linked)
+                {
+                    connectionInstance.LocationChanged += OnLocationUpdated;
+                    linked = true;
+                }
+            }
+            else
+            {
+                if (linked)
+                {
+                    connectionInstance.LocationChanged -= OnLocationUpdated;
+                    linked = false;
+                }
+            }
         }
 
         public void StartRecording()
         {
-            ListOfFrames = new List<RecordedFrame>();
-            EndingTime = -1;
-            watch.Restart();
-            connectionInstance.LocationChanged += OnLocationUpdated;
+            OffsetCorrection += watch.ElapsedMilliseconds - PauseTime;
+            ChangeEvents(true);
+        }
+
+        public void Seek(int index, bool removeAhead = true)
+        {
+            if (ListOfFrames != null)
+            {
+                if (index > ListOfFrames?.Count - 1 || index < 0)
+                    throw new IndexOutOfRangeException("Cannot use index that is out of range.");
+                ListOfFrames?.RemoveRange(index, ListOfFrames.Count - index - 1);
+            }
         }
 
         /// <summary>
@@ -41,16 +80,13 @@ namespace FlightRewinderRecordingLogic
         {
             if (ListOfFrames == null)
                 throw new InvalidOperationException("Recording hasn't started.");
-            long currentFrame = watch.ElapsedMilliseconds;
+            long currentFrame = watch.ElapsedMilliseconds - OffsetCorrection;
             var nextFrame = new RecordedFrame(postion, currentFrame);
             ListOfFrames.Add(nextFrame);
-            //Check to see if too many frames have been recorded.
-            if (ListOfFrames.Count > MaxFrames)
-                RemoveFrame(ListOfFrames.Count-1);
             RecorderUpdated?.Invoke(this, new(nextFrame));
         }
 
-        public void RemoveFrame(int index, bool correctDeltaTime = true)
+        public void RemoveFrame(int index)
         {
             if (index > ListOfFrames?.Count - 1 || index < 0)
                 throw new IndexOutOfRangeException("Cannot access index to make modifications.");
@@ -67,10 +103,16 @@ namespace FlightRewinderRecordingLogic
             RecordFrame(args.Position);
         }
 
+        public void FinishRecording()
+        {
+            StopRecording();
+            EndingTime = watch.ElapsedMilliseconds;
+        }
+
         public void StopRecording()
         {
-            EndingTime = watch.ElapsedMilliseconds;
-            connectionInstance.LocationChanged -= OnLocationUpdated;
+            PauseTime = watch.ElapsedMilliseconds;
+            ChangeEvents(false);
         }
 
         public SaveData DumpData()

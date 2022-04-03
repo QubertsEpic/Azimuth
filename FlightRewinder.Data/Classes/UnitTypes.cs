@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlightRewinderData.Classes
+namespace FlightRewinder.Classes
 {
     public static class UnitTypes
     {
@@ -176,7 +176,7 @@ namespace FlightRewinderData.Classes
         public const string Ratio = "ratio";
         public const string Number = "number";
         public const string Scaler = "scaler";
-        public const string Positino = "position";
+        public const string Position = "position";
         public const string Enum = "Enum";
         public const string Bool = "bool";
         public const string Bco16 = "Bco16";

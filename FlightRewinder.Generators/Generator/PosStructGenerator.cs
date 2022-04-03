@@ -23,9 +23,9 @@ namespace FlightRewinder.Generators
         {
             StringBuilder builder = new StringBuilder();
 
-                builder.Append(@"
-using FlightRewinderData.Classes;
-using FlightRewinderData.StructAttributes;
+            builder.Append(@"
+using FlightRewinder.Classes;
+using FlightRewinder.StructAttributes;
 using Microsoft.FlightSimulator.SimConnect;
 using System.Runtime.InteropServices;
 
@@ -53,7 +53,7 @@ namespace FlightRewinder.Structs
             StringBuilder builder = new StringBuilder();
 
             builder.Append(@"
-using FlightRewinderData.Classes;
+using FlightRewinder.Classes;
 using System;
 using FlightRewinder.Structs;
 using System.Collections.Generic;
@@ -77,10 +77,10 @@ namespace FlightRewinder.Structs
         };"
 );
             builder.Append(@"
-        public static PositionSetStruct Interpolate(PositionStruct oldPosition, PositionStruct newPosition, double interpolation)
+        public static PositionSetStruct Interpolate(PositionSetStruct oldPosition, PositionSetStruct newPosition, double interpolation)
         => new PositionSetStruct(){
 ");
-            foreach(var field in fields)
+            foreach (var field in fields)
             {
                 switch (field.type)
                 {
@@ -97,8 +97,44 @@ namespace FlightRewinder.Structs
                         break;
                 }
             }
-            builder.Append("};}}");
 
+            builder.Append("};");
+
+            builder.Append(@"
+        public static PositionSetStruct Add(PositionSetStruct first, PositionSetStruct second)
+            => new PositionSetStruct(){
+");
+            foreach (var field in fields)
+            {
+                switch (field.type)
+                {
+                    case "double":
+                        builder.Append($"{field.name} = first.{field.name} + second.{field.name},");
+                        break;
+                    case "int":
+                        builder.Append($"{field.name} = first.{field.name} + second.{field.name},");
+                        break;
+                    case "uint":
+                        builder.Append($"{field.name} = first.{field.name} + second.{field.name},");
+                        break;
+                    default:
+
+                        break;
+                        
+                }
+            }
+            builder.Append("};");
+
+            builder.Append(@"
+        public static string GetString(PositionStruct data) => 
+            $""");
+            foreach((string type, string name) in fields)
+            {
+                builder.Append($"{name}: {{data.{name}}} ");
+            }
+            builder.Append(@""";");
+
+            builder.Append("}}");
 
             context.AddSource("Operators", builder.ToString());
         }

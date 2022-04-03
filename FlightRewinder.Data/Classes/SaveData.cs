@@ -1,4 +1,4 @@
-﻿using FlightRewinderData.Structs;
+﻿using FlightRewinder.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace FlightRewinderData.Classes
+namespace FlightRewinder.Classes
 {
     public class SaveData
     {

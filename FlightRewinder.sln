@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightRewinder.ClientWrappe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightRewinder.RecordingLogic", "FlightRewinder.RecordingLogic\FlightRewinder.RecordingLogic.csproj", "{6A42F80E-3FF5-4E53-B62C-211148CC95FC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightRewinder.Generators", "FlightRewinder.Generators\FlightRewinder.Generators.csproj", "{B4223220-90E0-4D50-9967-292045F5838E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|x64.ActiveCfg = Release|Any CPU
 		{6A42F80E-3FF5-4E53-B62C-211148CC95FC}.Release|x64.Build.0 = Release|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Debug|x64.Build.0 = Debug|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Release|x64.ActiveCfg = Release|Any CPU
+		{B4223220-90E0-4D50-9967-292045F5838E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

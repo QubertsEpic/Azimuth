@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlightRewinderData.Enums
+namespace FlightRewinder.Enums
 {
     public enum Requests : uint
     {

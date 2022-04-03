@@ -4,7 +4,13 @@
     <projectFile>FlightRewinder.ClientWrapper/FlightRewinder.ClientWrapper.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93548a97-89d9-4c69-81bf-2cce80765556" name="Changes" comment="" />
+    <list default="true" id="93548a97-89d9-4c69-81bf-2cce80765556" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.FlightRewinder/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.FlightRewinder/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlightRewinder.Data/FlightRewinder.Data.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/FlightRewinder.Data/FlightRewinder.Data.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlightRewinder.RecordingLogic/Recorder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlightRewinder.RecordingLogic/Recorder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlightRewinder.SimConnectWrapper/Core/Connection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FlightRewinder.SimConnectWrapper/Core/Connection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlightRewinder.sln" beforeDir="false" afterPath="$PROJECT_DIR$/FlightRewinder.sln" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,6 +64,7 @@
       <option name="presentableId" value="Default" />
       <updated>1648322991086</updated>
       <workItem from="1648322995949" duration="57000" />
+      <workItem from="1648744296563" duration="88000" />
     </task>
     <servers />
   </component>
@@ -65,7 +72,7 @@
     <option name="version" value="3" />
   </component>
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
-  <component name="UnityProjectConfiguration" hasMinimizedUI="null" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />

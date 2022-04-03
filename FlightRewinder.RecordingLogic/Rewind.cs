@@ -1,9 +1,9 @@
-﻿using FlightRewinder.Data.Structs;
-using FlightRewinderData.Classes;
-using FlightRewinderData.Enums;
-using FlightRewinderData.Structs;
+﻿using FlightRewinder.Structs;
+using FlightRewinder.Classes;
+using FlightRewinder.Enums;
 using SimConnectWrapper.Core;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlightRewinderRecordingLogic
@@ -18,8 +18,7 @@ namespace FlightRewinderRecordingLogic
         public uint PlaneID;
         public int currentFrame;
         public long? PauseTime;
-        public long? OffsetCorrection;
-        public Stopwatch? Watch;
+        public Stopwatch Watch = Stopwatch.StartNew();
 
         public bool Playing;
         private bool Stopping = false;
@@ -54,10 +53,6 @@ namespace FlightRewinderRecordingLogic
 
         public void ResumeRewind()
         {
-            if (PauseTime.HasValue)
-            {
-                OffsetCorrection = Watch?.ElapsedMilliseconds - PauseTime.Value;
-            }
         }
 
         public void AddReferences()
@@ -74,7 +69,7 @@ namespace FlightRewinderRecordingLogic
         {
             if (Playing)
             {
-                PauseTime = Watch?.ElapsedMilliseconds;
+                PauseTime = Watch.ElapsedMilliseconds;
                 Playing = false;
             }
         }
@@ -86,7 +81,6 @@ namespace FlightRewinderRecordingLogic
             Playing = true;
             PlaneID = planeID;
             currentFrame = 0;
-            OffsetCorrection = OffsetCorrection ?? 0;
             AddReferences();
 
             if (RecordedFrames.Any())
@@ -103,11 +97,12 @@ namespace FlightRewinderRecordingLogic
 
         private async Task StartReplaying()
         {
-            var frames = RecordedFrames.GetEnumerator();
-            RecordedFrame? previousFrame = null;
-            RecordedFrame? frame = null;
+            var frames = reversedFrames.GetEnumerator();
+            PositionStruct? lastPosition = null;
+            PositionStruct? position = null;
             long lastTime = 0;
-            Watch = Stopwatch.StartNew();
+            long frameTime = 0;
+            Watch.Restart();
             while (true)
             {
                 //Wait for a frame to pass.
@@ -127,16 +122,17 @@ namespace FlightRewinderRecordingLogic
                     return;
                 }
 
-                long? currentTime = (long?)((Watch?.ElapsedMilliseconds - OffsetCorrection) * RewindRate);
+                long currentTime = (long)(Watch.ElapsedMilliseconds * RewindRate);
 
-                while (currentTime > lastTime)
+                while (currentTime > frameTime)
                 {
                     var success = frames.MoveNext();
-                    previousFrame = frames.Current;
                     if (success)
                     {
-                        lastTime = frames.Current.Time;
-                        frame = frames.Current;
+                        lastPosition = position;
+                        lastTime = frameTime;
+                        position = frames.Current.Position;
+                        frameTime = frames.Current.Time;
                         currentFrame++;
                     }
                     else
@@ -145,17 +141,17 @@ namespace FlightRewinderRecordingLogic
                         return;
                     }
                 }
-                if (frame != null)
+                if (position.HasValue && lastPosition.HasValue)
                 {
-                    MoveCraft(frame);
+                    MoveCraft(position, frameTime, lastPosition, lastTime, currentTime);
                 }
             }
         }
 
         public void AbortReplay()
         {
-            Watch = null;
             currentFrame = -1;
+            RemoveReferences();
         }
 
         private void Tick()
@@ -166,9 +162,15 @@ namespace FlightRewinderRecordingLogic
             }
         }
 
-        public void MoveCraft(RecordedFrame newPosition)
+        public void MoveCraft(PositionStruct? newPosition, long time, PositionStruct? oldPosition, long oldTime, long currenTime)
         {
-            Instance.SetData(0, Definitions.SetLocation, PositionStructOperators.ToSet(newPosition.Position));
+            if (newPosition.HasValue && oldPosition.HasValue)
+            {
+                double interpolation = (double)(currenTime - oldTime) / (time - oldTime);
+                if (interpolation == 0.5)
+                    interpolation = 0.501;
+                Instance.SetData(0, Definitions.SetLocation, PositionStructOperators.Interpolate(PositionStructOperators.ToSet(oldPosition.Value), PositionStructOperators.ToSet(newPosition.Value), interpolation));
+            }
         }
     }
 }

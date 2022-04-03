@@ -1,4 +1,4 @@
-﻿using FlightRewinderData.StructAttributes;
+﻿using FlightRewinder.StructAttributes;
 using Microsoft.FlightSimulator.SimConnect;
 using System;
 using System.Collections.Generic;

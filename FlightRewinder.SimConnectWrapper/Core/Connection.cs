@@ -1,7 +1,7 @@
-﻿using FlightRewinder.Data.Enums;
-using FlightRewinderData.Enums;
-using FlightRewinderData.StructAttributes;
-using FlightRewinderData.Structs;
+﻿using FlightRewinder.Enums;
+using FlightRewinder.Structs;
+using FlightRewinder.StructAttributes;
+using FlightRewinder.Data.Enums;
 using Microsoft.FlightSimulator.SimConnect;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
@@ -22,6 +22,7 @@ namespace SimConnectWrapper.Core
         public event EventHandler? Initialised;
         public event EventHandler? Quit;
         public event EventHandler? FrameEvent;
+        public event EventHandler<SIMCONNECT_RECV_EVENT>? Event;
         public event EventHandler<LocationChangedEventArgs>? LocationChanged;
         public object lockObject = new();
         const int WM_USER_SIMCONNECT = 0x0402;
@@ -44,6 +45,7 @@ namespace SimConnectWrapper.Core
                 instance.OnRecvException += Instance_OnRecvException;
                 instance.OnRecvSimobjectData += Instance_OnRecvSimobjectData;
                 instance.OnRecvEventFrame += Instance_OnRecvEventFrame;
+                instance.OnRecvEvent += Instance_OnRecvEvent;
                 instance.AddToDataDefinition(Definitions.InitialPosition, "Initial Position", null, SIMCONNECT_DATATYPE.INITPOSITION, 0f, SimConnect.SIMCONNECT_UNUSED);
 
                 instance.SubscribeToSystemEvent(Events.FRAME, "Frame");
@@ -52,6 +54,30 @@ namespace SimConnectWrapper.Core
                 StartDataTransfer();
 
                 Initialised?.Invoke(this, new EventArgs());
+            }
+        }
+
+        private void Instance_OnRecvEvent(SimConnect sender, SIMCONNECT_RECV_EVENT data)
+        {
+            try
+            {
+                if (data == null)
+                    throw new ArgumentNullException(nameof(data), "Cannot use null arguments.");
+                Event?.Invoke(this, data);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message + "\n\nDisconnecting...");
+                Dispose();
+            }
+        }
+
+        private void Dispose()
+        {
+            if (instance != null)
+            {
+                instance.Dispose();
+                instance = null;
             }
         }
 
@@ -110,7 +136,7 @@ namespace SimConnectWrapper.Core
         {
             lock (lockObject)
             {
-                instance?.SetDataOnSimObject(Definitions.InitialPosition, planeID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, PositionStructHelper.PosStructToInitPos(position));
+                instance?.SetDataOnSimObject(Definitions.InitialPosition, planeID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, PositionStructOperators.PosStructToInitPos(position));
             }
         }
 
@@ -127,7 +153,7 @@ namespace SimConnectWrapper.Core
                 if (instance != null)
                 {
                     Console.WriteLine("Simconnect has exited.");
-                    instance.Dispose();
+                    instance?.Dispose();
                     instance = null;
                 }
                 else
@@ -155,7 +181,7 @@ namespace SimConnectWrapper.Core
                 RequestCount = (RequestCount++) % 10000;
                 try
                 {
-                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStructHelper.PosStructToInitPos(position), request);
+                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStructOperators.PosStructToInitPos(position), request);
                     return RequestCount;
                 }
                 catch (Exception e)
@@ -195,6 +221,44 @@ namespace SimConnectWrapper.Core
                     Console.WriteLine("Error while removing plane, possibly missing aircraftID");
                     return;
                 }
+            }
+        }
+
+        public bool MapInputToGroup(Enum groupId, List<(string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)> args)
+        {
+            try
+            {
+                lock (lockObject)
+                {
+                    foreach (var arg in args)
+                    {
+                        instance?.MapInputEventToClientEvent(groupId, arg.inputDefinition, arg.downEventID, arg.downValue, arg.upEventID, arg.upValue, false);
+                    }
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool MapInputToGroup(Enum groupId, params (string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)[] args)
+        {
+            try
+            {
+                lock (lockObject)
+                {
+                    foreach (var param in args)
+                    {
+                        instance?.MapInputEventToClientEvent(groupId, param.inputDefinition, param.downEventID, param.downValue, param.upEventID, param.upValue, false);
+                    }
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
@@ -242,7 +306,7 @@ namespace SimConnectWrapper.Core
             {
                 if (instance == null)
                     return;
-                List<DefinitionAttribute> attributes = PositionStructHelper.GetAllAttributes();
+                List<DefinitionAttribute> attributes = PositionStructOperators.GetAllAttributes();
                 AddToDataDefinition<PositionStruct>(Definitions.LocationStruct, attributes);
                 AddToDataDefinition<PositionSetStruct>(Definitions.SetLocation, attributes);
             }

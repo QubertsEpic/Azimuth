@@ -1,11 +1,12 @@
-﻿using FlightRewinderData.Classes;
-using FlightRewinderData.StructAttributes;
-using FlightRewinderData.Structs;
+﻿using FlightRewinder.Classes;
+using FlightRewinder.StructAttributes;
+using FlightRewinder.Structs;
 using FlightRewinderRecordingLogic;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -37,16 +38,10 @@ namespace FlighRewindClientWrapper
             if (_simConnection == null)
                 _simConnection = new Connection();
             IntPtr handle = new WindowInteropHelper(this).Handle;
-            _simConnection.LocationChanged += _simConnection_LocationChanged;
             _simConnection.Initialised += _simConnection_Initialised;
             var handleSource = HwndSource.FromHwnd(handle);
             handleSource.AddHook(HandleHook);
             Connect();
-        }
-
-        private void _simConnection_LocationChanged(object? sender, LocationChangedEventArgs e)
-        {
-            DefaultTextBlock.Text = e.Position.Altitude.ToString();
         }
 
         private IntPtr HandleHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr iParam, ref bool handled)
@@ -69,7 +64,6 @@ namespace FlighRewindClientWrapper
             try
             {
                 _simConnection.Initialise(Handle);
-                _simConnection.LocationChanged += _simConnection_LocationChanged;
             }
             catch (COMException)
             {
@@ -98,7 +92,7 @@ namespace FlighRewindClientWrapper
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            _recorder?.StartRecording();
+            _recorder?.RestartRecording();
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
@@ -117,6 +111,22 @@ namespace FlighRewindClientWrapper
                     _rewinder?.StartReplay(Connection.UserPlane);
                 }
             }
+        }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            var saveData = _recorder?.DumpData();
+            FileStream steram = File.Open("epic.txt", FileMode.Create);
+            StreamWriter writer = new StreamWriter(steram);
+            if (saveData?.Frames != null)
+            {
+                foreach (var data in saveData.Frames)
+                {
+                    writer.WriteLine(PositionStructOperators.GetString(data.Position));
+                }
+            }
+            steram.Flush();
+            steram.Close();
         }
     }
 }
