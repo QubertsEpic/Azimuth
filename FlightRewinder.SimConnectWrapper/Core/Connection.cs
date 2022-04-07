@@ -171,9 +171,9 @@ namespace SimConnectWrapper.Core
         /// Creates an AI Aircraft that can be modified. Returns the aircraft ID.
         /// </summary>
         /// <param name="title"></param>
-        /// <param name="position"></param>
+        /// <param name="initPosition"></param>
         /// <returns></returns>
-        public uint CreatePlane(string title, PositionStruct position)
+        public uint CreatePlane(string title, PositionStruct initPosition)
         {
             lock (lockObject)
             {
@@ -181,7 +181,7 @@ namespace SimConnectWrapper.Core
                 RequestCount = (RequestCount++) % 10000;
                 try
                 {
-                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStructOperators.PosStructToInitPos(position), request);
+                    instance?.AICreateNonATCAircraft(title, "Rewind", PositionStructOperators.PosStructToInitPos(initPosition), request);
                     return RequestCount;
                 }
                 catch (Exception e)
@@ -192,13 +192,13 @@ namespace SimConnectWrapper.Core
             }
         }
 
-        public void SetData(uint aircraftID, Enum definition, object dataToSet)
+        public void SetPos(uint aircraftID, PositionSetStruct dataToSet)
         {
             lock (lockObject)
             {
                 try
                 {
-                    instance?.SetDataOnSimObject(definition, aircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, dataToSet);
+                    instance?.SetDataOnSimObject(Definitions.SetLocation, aircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, dataToSet);
                 }
                 catch (Exception)
                 {
