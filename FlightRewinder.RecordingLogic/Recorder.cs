@@ -14,6 +14,7 @@ namespace FlightRewinderRecordingLogic
         public List<RecordedFrame>? ListOfFrames = new List<RecordedFrame>();
         public Stopwatch watch = Stopwatch.StartNew();
         public bool Recording => EndingTime < 0;
+        public int? MaxIndex => ListOfFrames?.Count - 1;
 
         private bool linked = false;
 
@@ -33,6 +34,7 @@ namespace FlightRewinderRecordingLogic
             EndingTime = -1;
             PauseTime = 0;
             OffsetCorrection = 0;
+            ListOfFrames = new List<RecordedFrame>();
             watch.Restart();
             StartRecording();
         }

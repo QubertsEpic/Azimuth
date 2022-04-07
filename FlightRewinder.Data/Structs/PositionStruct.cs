@@ -18,8 +18,6 @@ namespace FlightRewinder.Structs
 
         [DefinitionAttribute("PLANE ALTITUDE", UnitTypes.Foot, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Altitude;
-        [Definition("PLANE ALT ABOVE GROUND", UnitTypes.Foot, SIMCONNECT_DATATYPE.FLOAT64)]
-        public double AltitudeAboveGround;
         [DefinitionAttribute("PLANE LONGITUDE", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]
         public double Longitude;
         [DefinitionAttribute("PLANE LATITUDE", UnitTypes.Degree, SIMCONNECT_DATATYPE.FLOAT64)]

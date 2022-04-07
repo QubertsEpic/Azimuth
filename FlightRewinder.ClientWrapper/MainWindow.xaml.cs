@@ -1,4 +1,5 @@
 ﻿using FlightRewinder.Classes;
+using FlightRewinder.Data.DataEventArgs;
 using FlightRewinder.StructAttributes;
 using FlightRewinder.Structs;
 using FlightRewinderRecordingLogic;
@@ -64,6 +65,7 @@ namespace FlighRewindClientWrapper
             try
             {
                 _simConnection.Initialise(Handle);
+                AddEvents();
             }
             catch (COMException)
             {
@@ -107,9 +109,51 @@ namespace FlighRewindClientWrapper
                 var data = _recorder.DumpData();
                 if (data?.Frames != null)
                 {
-                    _rewinder?.LoadData(data.Frames);
-                    _rewinder?.StartReplay(Connection.UserPlane);
+                    _rewinder?.LoadFrames(data.Frames);
+                    _rewinder?.StartRewind();
                 }
+            }
+        }
+
+        public void AddEvents()
+        {
+            if (_rewinder != null)
+            {
+                _rewinder.FrameChanged += FrameChanged;
+                _rewinder.ReplayStopped += _rewinder_ReplayStopped;
+            }
+            if (_simConnection != null)
+                _simConnection.LocationChanged += _simConnection_LocationChanged;
+        }
+
+        private void _rewinder_ReplayStopped(object? sender, EventArgs e)
+        {
+            _recorder?.StartRecording();
+        }
+
+        private void _simConnection_LocationChanged(object? sender, LocationChangedEventArgs e)
+        {
+            UpdateDisplay(e.Position);
+        }
+
+        public void UpdateDisplay(PositionStruct set)
+        {
+            AltitudeBox.Text = set.Altitude.ToString();
+            LongitudeBox.Text = set.Longitude.ToString();
+            LatitudeBox.Text = set.Latitude.ToString();
+
+            BankBox.Text = set.Bank.ToString();
+            PitchBox.Text = set.Pitch.ToString();
+            HeadingBox.Text = set.Heading.ToString();
+        }
+
+        public void FrameChanged(object? sender, ReplayFrameChangedEventArgs args)
+        {
+            if (args?.FrameIndex == null)
+                throw new ArgumentNullException(nameof(args), "Cannot use null args!");
+            if (_recorder != null)
+            {
+                //_recorder.RemoveFrame(args.FrameIndex.Value);
             }
         }
 
