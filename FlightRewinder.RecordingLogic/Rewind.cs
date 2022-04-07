@@ -149,7 +149,6 @@ namespace FlightRewinderRecordingLogic
                     Console.WriteLine("Replay Failed :(" + ex.Message);
                     AbortReplay();
                 }
-
                 
                 if (position.HasValue && lastPosition.HasValue)
                 {
