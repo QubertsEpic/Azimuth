@@ -1,8 +1,10 @@
 ﻿using FlightRewinder.Classes;
 using FlightRewinder.Data.DataEventArgs;
+using FlightRewinder.Data.Enums;
 using FlightRewinder.StructAttributes;
 using FlightRewinder.Structs;
 using FlightRewinderRecordingLogic;
+using Microsoft.FlightSimulator.SimConnect;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
@@ -65,6 +67,7 @@ namespace FlighRewindClientWrapper
             try
             {
                 _simConnection.Initialise(Handle);
+                BindKeyEvents();
                 AddEvents();
             }
             catch (COMException)
@@ -80,6 +83,14 @@ namespace FlighRewindClientWrapper
             }
         }
         //Make a method for rewinding, stop recording, dump the data and start playing it in reverse.
+
+        public void BindKeyEvents()
+        {
+            if(_simConnection != null)
+            {
+                _simConnection.MapInputToGroup(InputGroups.Group1, new List<(string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)>() { { ("B", Events.InputEventRewindDown, 0, Events.InputEventRewindUp, 0) } });
+            }
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -97,15 +108,12 @@ namespace FlighRewindClientWrapper
             _recorder?.RestartRecording();
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
-        {
-            _recorder?.StopRecording();
-        }
-
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             if (_recorder != null)
             {
+                if(_recorder.Recording)
+                    _recorder.StopRecording();
                 var data = _recorder.DumpData();
                 if (data?.Frames != null)
                 {
@@ -123,7 +131,22 @@ namespace FlighRewindClientWrapper
                 _rewinder.ReplayStopped += _rewinder_ReplayStopped;
             }
             if (_simConnection != null)
+            {
+                _simConnection.Event += _simConnection_Event;
                 _simConnection.LocationChanged += _simConnection_LocationChanged;
+            }
+        }
+
+        private void _simConnection_Event(object? sender, SIMCONNECT_RECV_EVENT e)
+        {
+            if(e.uGroupID == (uint)InputGroups.Group1)
+            {
+                switch (e.uEventID)
+                {
+                    case (uint)Events.InputEventRewindDown:
+                        break;
+                }
+            }
         }
 
         private void _rewinder_ReplayStopped(object? sender, EventArgs e)
@@ -153,7 +176,7 @@ namespace FlighRewindClientWrapper
                 throw new ArgumentNullException(nameof(args), "Cannot use null args!");
             if (_recorder != null)
             {
-                //_recorder.RemoveFrame(args.FrameIndex.Value);
+                _recorder.RemoveFrame(args.FrameIndex.Value);
             }
         }
 

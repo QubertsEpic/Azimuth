@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace FlightRewinder.Data.Enums
 {
-    public enum Events
+    public enum InputGroups
     {
-        FRAME,
-        InputEventRewindDown,
-        InputEventRewindUp,
+        Group1
     }
+
+    
 }

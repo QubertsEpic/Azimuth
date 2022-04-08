@@ -136,6 +136,7 @@ namespace FlightRewinderRecordingLogic
                             AbortReplay();
                             return;
                         }
+
                         lastPosition = position;
                         lastTime = frameTime;
                         position = RecordedFrames[CurrentFrame].Position;

@@ -224,7 +224,17 @@ namespace SimConnectWrapper.Core
             }
         }
 
-        public bool MapInputToGroup(Enum groupId, List<(string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)> args)
+        public void SetInputActivationStatus(Enum group, SIMCONNECT_STATE state)
+        {
+            if (group == null)
+                throw new ArgumentNullException(nameof(group), "Cannot use null group");
+            lock (lockObject)
+            {
+                instance?.SetInputGroupState(group, ((uint)state));
+            }
+        }
+
+        public bool MapInputToGroup(Enum groupId, List<(string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)> args, SIMCONNECT_STATE defaultState = SIMCONNECT_STATE.ON)
         {
             try
             {
@@ -235,6 +245,7 @@ namespace SimConnectWrapper.Core
                         instance?.MapInputEventToClientEvent(groupId, arg.inputDefinition, arg.downEventID, arg.downValue, arg.upEventID, arg.upValue, false);
                     }
                 }
+                SetInputActivationStatus(groupId, defaultState);
                 return true;
             }
             catch (Exception)
@@ -243,7 +254,7 @@ namespace SimConnectWrapper.Core
             }
         }
 
-        public bool MapInputToGroup(Enum groupId, params (string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)[] args)
+        public bool MapInputToGroup(Enum groupId, SIMCONNECT_STATE defaultState = SIMCONNECT_STATE.ON, params (string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)[] args)
         {
             try
             {
@@ -254,6 +265,7 @@ namespace SimConnectWrapper.Core
                         instance?.MapInputEventToClientEvent(groupId, param.inputDefinition, param.downEventID, param.downValue, param.upEventID, param.upValue, false);
                     }
                 }
+                SetInputActivationStatus(groupId, defaultState);
                 return true;
             }
             catch (Exception)

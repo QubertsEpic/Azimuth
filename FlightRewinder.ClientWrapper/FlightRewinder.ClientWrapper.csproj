@@ -14,4 +14,10 @@
     <ProjectReference Include="..\FlightRewinder.SimConnectWrapper\FlightRecorder.SimConnectWrapper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Microsoft.FlightSimulator.SimConnect">
+      <HintPath>..\FlightRewinder.SimConnectWrapper\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
