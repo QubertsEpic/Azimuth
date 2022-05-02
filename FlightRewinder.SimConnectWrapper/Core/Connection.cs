@@ -24,8 +24,9 @@ namespace SimConnectWrapper.Core
         public event EventHandler? FrameEvent;
         public event EventHandler<SIMCONNECT_RECV_EVENT>? Event;
         public event EventHandler<LocationChangedEventArgs>? LocationChanged;
+
         public object lockObject = new();
-        const int WM_USER_SIMCONNECT = 0x0402;
+        public const int WM_USER_SIMCONNECT = 0x0402;
 
 
         public Connection()
@@ -234,46 +235,20 @@ namespace SimConnectWrapper.Core
             }
         }
 
-        public bool MapInputToGroup(Enum groupId, List<(string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)> args, SIMCONNECT_STATE defaultState = SIMCONNECT_STATE.ON)
+        public void MapClientEventToSimEvent(params (Enum eventId, string eventName)[] args)
         {
-            try
+            if (args == null)
+                throw new ArgumentNullException(nameof(args), "Cannot use null argument.");
+            foreach ((Enum id, string name) in args)
             {
                 lock (lockObject)
                 {
-                    foreach (var arg in args)
-                    {
-                        instance?.MapInputEventToClientEvent(groupId, arg.inputDefinition, arg.downEventID, arg.downValue, arg.upEventID, arg.upValue, false);
-                    }
+                    instance?.MapClientEventToSimEvent(id, name);
                 }
-                SetInputActivationStatus(groupId, defaultState);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
             }
         }
 
-        public bool MapInputToGroup(Enum groupId, SIMCONNECT_STATE defaultState = SIMCONNECT_STATE.ON, params (string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)[] args)
-        {
-            try
-            {
-                lock (lockObject)
-                {
-                    foreach (var param in args)
-                    {
-                        instance?.MapInputEventToClientEvent(groupId, param.inputDefinition, param.downEventID, param.downValue, param.upEventID, param.upValue, false);
-                    }
-                }
-                SetInputActivationStatus(groupId, defaultState);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
+        
         public void AddToDataDefinition<T>(Enum definition, params (string name, string unit, SIMCONNECT_DATATYPE dataType)[] objects)
         {
             lock (lockObject)
@@ -314,14 +289,11 @@ namespace SimConnectWrapper.Core
 
         public void PrepareData()
         {
-            lock (lockObject)
-            {
-                if (instance == null)
-                    return;
-                List<DefinitionAttribute> attributes = PositionStructOperators.GetAllAttributes();
-                AddToDataDefinition<PositionStruct>(Definitions.LocationStruct, attributes);
-                AddToDataDefinition<PositionSetStruct>(Definitions.SetLocation, attributes);
-            }
+            if (instance == null)
+                return;
+            List<DefinitionAttribute> attributes = PositionStructOperators.GetAllAttributes();
+            AddToDataDefinition<PositionStruct>(Definitions.LocationStruct, attributes);
+            AddToDataDefinition<PositionSetStruct>(Definitions.SetLocation, attributes);
         }
     }
 }

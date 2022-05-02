@@ -20,8 +20,7 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" x:Name="DefaultTextBlock" Text="Placeholder" FontSize="20px" HorizontalAlignment="Center" Foreground="Black"/>
-
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" x:Name="DefaultTextBlock" Text="Placeholder" FontSize="20px" HorizontalAlignment="Center" Foreground="Black"/>
         <Grid Grid.Row="1" Grid.ColumnSpan="5">
             <Grid.Resources>
                 <Style x:Key="Base" TargetType="{x:Type FrameworkElement}">
@@ -56,10 +55,10 @@
             <TextBlock Grid.Row="5" Text="Heading"/>
             <TextBox IsEnabled="False" FontSize="20px" Grid.Row="5" Grid.Column="1" x:Name="HeadingBox"/>
         </Grid>
-
+        
         <Button Grid.Row="2" Grid.Column="0" Margin="10" FontSize="20px" Content="Connect" Click="Button_Click_1"/>
         <Button Grid.Row="2" Grid.Column="1" Margin="10" FontSize="20px" Content="Start Recording" Click="Button_Click"/>
         <Button Grid.Row="2" Grid.Column="2" Margin="10" FontSize="20px" Content="Start Replay" Click="Button_Click_3"/>
-        <Button Grid.Row="2" Grid.Column="3" Margin="10" FontSize="20px" Content="Dump Data" Click="Button_Click_4"/>
+        <Button Grid.Row="2" Grid.Column="3" Margin="10" FontSize="15px" Content="Dump Data (Debug Only)" Click="Button_Click_4"/>
     </Grid>
 </Window>

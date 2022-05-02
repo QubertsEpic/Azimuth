@@ -14,7 +14,7 @@ namespace FlightRewinderRecordingLogic
         public Connection Instance;
         public Recorder RecorderInstance;
 
-        public event EventHandler<ReplayFrameChangedEventArgs>? FrameChanged;
+        public event EventHandler<ReplayFrameChangedEventArgs>? FrameFinished;
         public event EventHandler? ReplayStopped;
 
         public double RewindRate = 1;
@@ -65,13 +65,28 @@ namespace FlightRewinderRecordingLogic
             }
         }
 
+        public void StopReplay()
+        {
+            if (Playing)
+            {
+                Stopping = true;
+            }
+        }
+
         public void LoadFrames(List<RecordedFrame> frames)
         {
             if (frames == null)
             {
                 throw new ArgumentNullException(nameof(frames), "Cannot use null frame set.");
             }
+            if (CurrentFrame < 0 || CurrentFrame > frames.Count)
+                CurrentFrame = 0;
             RecordedFrames = frames;
+        }
+
+        public void SeekRewind(int framePosition)
+        {
+            CurrentFrame = framePosition;
         }
 
         public void StartRewind()
@@ -80,7 +95,10 @@ namespace FlightRewinderRecordingLogic
             {
                 throw new NullReferenceException("Cannot replay while frames are null.");
             }
-            CurrentFrame = RecordedFrames.Count - 1;
+            if(CurrentFrame < 0 || CurrentFrame > RecordedFrames.Count)
+            {
+                throw new IndexOutOfRangeException("Cannot use null currentFrame index.");
+            }
             Playing = true;
             AddReferences();
             Watch.Restart();
@@ -128,6 +146,7 @@ namespace FlightRewinderRecordingLogic
                 {
                     while (currentTime < frameTime)
                     {
+                        FrameFinished?.Invoke(this, new(CurrentFrame, currentTime));
                         CurrentFrame -= 1;
 
                         if (CurrentFrame < 0)
@@ -142,7 +161,6 @@ namespace FlightRewinderRecordingLogic
                         position = RecordedFrames[CurrentFrame].Position;
                         frameTime = RecordedFrames[CurrentFrame].Time;
 
-                        FrameChanged?.Invoke(this, new(CurrentFrame, currentTime));
                     }
                 }
                 catch (Exception ex)
@@ -160,6 +178,7 @@ namespace FlightRewinderRecordingLogic
 
         public void AbortReplay()
         {
+            Playing = false;
             ReplayStopped?.Invoke(this, new());
             RemoveReferences();
         }
@@ -181,7 +200,7 @@ namespace FlightRewinderRecordingLogic
                 {
                     interpolation = 0.501;
                 }
-                Instance.SetPos(0, PositionStructOperators.Interpolate(PositionStructOperators.ToSet(oldPosition.Value), PositionStructOperators.ToSet(newPosition.Value), interpolation));
+                Instance.SetPos(Connection.UserPlane, PositionStructOperators.Interpolate(PositionStructOperators.ToSet(oldPosition.Value), PositionStructOperators.ToSet(newPosition.Value), interpolation));
             }
         }
     }

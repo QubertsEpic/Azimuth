@@ -94,6 +94,32 @@ namespace FlightRewinder.Structs
                         builder.Append($" {field.name} = (uint) Math.Round(interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation)),");
                         break;
                     default:
+                        builder.Append($" {field.name} = oldPosition.{field.name}");
+                        break;
+                }
+            }
+
+            builder.Append("};");
+
+            builder.Append(@"
+        public static PositionSetStruct Scale(PositionSetStruct position, double factor)
+        => new PositionSetStruct(){
+");
+            foreach (var field in fields)
+            {
+                switch (field.type)
+                {
+                    case "double":
+                        builder.Append($"{field.name} = position.{field.name} * factor,");
+                        break;
+                    case "int":
+                        builder.Append($"{field.name} = (int) (position.{field.name} * factor),");
+                        break;
+                    case "uint":
+                        builder.Append($" {field.name} = (uint) (position.{field.name} * factor),");
+                        break;
+                    default:
+                        builder.Append($" {field.name} = position.{field.name},");
                         break;
                 }
             }

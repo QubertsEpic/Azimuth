@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace FlightRewinder.Data.Enums
 {
-    public enum Events
+    public enum Events : uint
     {
         FRAME,
         InputEventRewindDown,
         InputEventRewindUp,
+        Unused = uint.MaxValue
     }
 }

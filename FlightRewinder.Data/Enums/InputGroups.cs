@@ -8,8 +8,8 @@ namespace FlightRewinder.Data.Enums
 {
     public enum InputGroups
     {
-        Group1
+        Group1 = 0,
+        notifGroup1 = 1
     }
 
-    
 }

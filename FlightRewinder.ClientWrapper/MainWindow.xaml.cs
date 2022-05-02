@@ -1,18 +1,14 @@
-﻿using FlightRewinder.Classes;
+﻿using FlightRewinder.ClientWrapper;
 using FlightRewinder.Data.DataEventArgs;
 using FlightRewinder.Data.Enums;
-using FlightRewinder.StructAttributes;
 using FlightRewinder.Structs;
 using FlightRewinderRecordingLogic;
 using Microsoft.FlightSimulator.SimConnect;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -26,7 +22,10 @@ namespace FlighRewindClientWrapper
         Connection? _simConnection;
         Recorder? _recorder;
         Rewind? _rewinder;
+        Hotkeys? _hotkeyHandler;
         IntPtr Handle;
+        int count = 0;
+        bool updatePosition = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -36,22 +35,21 @@ namespace FlighRewindClientWrapper
         {
             DefaultTextBlock.Text = "Connected.";
         }
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            if (_simConnection == null)
-                _simConnection = new Connection();
-            IntPtr handle = new WindowInteropHelper(this).Handle;
-            _simConnection.Initialised += _simConnection_Initialised;
-            var handleSource = HwndSource.FromHwnd(handle);
-            handleSource.AddHook(HandleHook);
-            Connect();
-        }
-
+        private void Button_Click_1(object sender, RoutedEventArgs e) => Connect();
         private IntPtr HandleHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr iParam, ref bool handled)
         {
             try
             {
-                _simConnection?.HandleEvents(msg, ref handled);
+                switch (msg)
+                {
+                    case Connection.WM_USER_SIMCONNECT:
+                        _simConnection?.HandleEvents(msg, ref handled);
+                        break;
+                    case Hotkeys.HOTKEY_MESSAGE_ID:
+                        _hotkeyHandler?.HandleMessages(wParam, iParam);
+                        break;
+
+                }
                 return IntPtr.Zero;
             }
             catch (Exception)
@@ -62,12 +60,18 @@ namespace FlighRewindClientWrapper
 
         public void Connect()
         {
-            if (_simConnection == null)
-                throw new NullReferenceException("Cannot connect to simconnect.");
+            Handle = new WindowInteropHelper(this).Handle;
+            _simConnection = new Connection();
+            _hotkeyHandler = new Hotkeys(Handle);
+            _hotkeyHandler.KeyPressed += _hotkeyHandler_KeyPressed;
+            _simConnection.Initialised += _simConnection_Initialised;
+            var handleSource = HwndSource.FromHwnd(Handle);
+            handleSource.AddHook(HandleHook);
+            RegisterHotkeys();
+
             try
             {
                 _simConnection.Initialise(Handle);
-                BindKeyEvents();
                 AddEvents();
             }
             catch (COMException)
@@ -79,29 +83,39 @@ namespace FlighRewindClientWrapper
             catch (Exception ex)
             {
                 DefaultTextBlock.Text = ex.Message;
+#if DEBUG
+                throw;
+#else
                 return;
+#endif
             }
         }
+
+        private void _hotkeyHandler_KeyPressed(object? sender, HotkeyPressedEventArgs e)
+        {
+            if (e == null)
+                return;
+            if (e.HotkeyID < 1 || e.HotkeyID > 2)
+                return;
+            SetReplay(e.HotkeyID == 1);
+        }
+
         //Make a method for rewinding, stop recording, dump the data and start playing it in reverse.
 
-        public void BindKeyEvents()
+        public void RegisterHotkeys()
         {
-            if(_simConnection != null)
-            {
-                _simConnection.MapInputToGroup(InputGroups.Group1, new List<(string inputDefinition, Enum downEventID, uint downValue, Enum upEventID, uint upValue)>() { { ("B", Events.InputEventRewindDown, 0, Events.InputEventRewindUp, 0) } });
-            }
+            if (_hotkeyHandler == null || _hotkeyHandler?.WindowHandle == null)
+                throw new NullReferenceException("Refuse to assign hotkeys to thread, make sure that you have attatched the window handle.");
+
+            //Key for replay start.   
+            _hotkeyHandler.RegisterHotKeys(1, (Hotkeys.MOD_SHIFT | Hotkeys.MOD_CTRL, 0x4D));
+
+            //Key for replay stop.
+            _hotkeyHandler.RegisterHotKeys(2, (Hotkeys.MOD_SHIFT | Hotkeys.MOD_CTRL, 0x4E));
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            _simConnection = new Connection();
-            _recorder = new Recorder(_simConnection);
-            _rewinder = new Rewind(_simConnection);
-            Handle = new WindowInteropHelper(this).Handle;
-            var handleHook = HwndSource.FromHwnd(Handle);
-            handleHook.AddHook(HandleHook);
-            Connect();
-        }
+        private void Window_Loaded(object sender, RoutedEventArgs e) => Connect();
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -110,15 +124,43 @@ namespace FlighRewindClientWrapper
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            if (_recorder != null)
+            SetReplay(true);
+        }
+
+        public void SetReplay(bool state)
+        {
+            if (_recorder != null && _rewinder != null)
             {
-                if(_recorder.Recording)
-                    _recorder.StopRecording();
-                var data = _recorder.DumpData();
-                if (data?.Frames != null)
+                if (state)
                 {
-                    _rewinder?.LoadFrames(data.Frames);
-                    _rewinder?.StartRewind();
+                    if (_rewinder.Playing)
+                        return;
+                    if (_recorder.Recording)
+                        _recorder.StopRecording();
+                    var data = _recorder.DumpData();
+                    try
+                    {
+                        if (data?.Frames != null)
+                        {
+                            _rewinder.LoadFrames(data.Frames);
+                            _rewinder.StartRewind();
+                        }
+                    }
+                    catch (NullReferenceException)
+                    {
+                        DefaultTextBlock.Text = "Cannot start replay.";
+#if DEBUG
+                        throw;
+#endif
+                    }
+                }
+                else
+                {
+                    if (_rewinder.Playing)
+                    {
+                        _rewinder.StopReplay();
+                        _recorder.StartRecording();
+                    }
                 }
             }
         }
@@ -127,25 +169,12 @@ namespace FlighRewindClientWrapper
         {
             if (_rewinder != null)
             {
-                _rewinder.FrameChanged += FrameChanged;
+                _rewinder.FrameFinished += FrameChanged;
                 _rewinder.ReplayStopped += _rewinder_ReplayStopped;
             }
             if (_simConnection != null)
             {
-                _simConnection.Event += _simConnection_Event;
                 _simConnection.LocationChanged += _simConnection_LocationChanged;
-            }
-        }
-
-        private void _simConnection_Event(object? sender, SIMCONNECT_RECV_EVENT e)
-        {
-            if(e.uGroupID == (uint)InputGroups.Group1)
-            {
-                switch (e.uEventID)
-                {
-                    case (uint)Events.InputEventRewindDown:
-                        break;
-                }
             }
         }
 
@@ -156,7 +185,8 @@ namespace FlighRewindClientWrapper
 
         private void _simConnection_LocationChanged(object? sender, LocationChangedEventArgs e)
         {
-            UpdateDisplay(e.Position);
+            if (updatePosition)
+                UpdateDisplay(e.Position);
         }
 
         public void UpdateDisplay(PositionStruct set)
@@ -173,7 +203,11 @@ namespace FlighRewindClientWrapper
         public void FrameChanged(object? sender, ReplayFrameChangedEventArgs args)
         {
             if (args?.FrameIndex == null)
+#if DEBUG
                 throw new ArgumentNullException(nameof(args), "Cannot use null args!");
+#else
+                return;
+#endif
             if (_recorder != null)
             {
                 _recorder.RemoveFrame(args.FrameIndex.Value);
@@ -182,6 +216,7 @@ namespace FlighRewindClientWrapper
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
+#if DEBUG
             var saveData = _recorder?.DumpData();
             FileStream steram = File.Open("epic.txt", FileMode.Create);
             StreamWriter writer = new StreamWriter(steram);
@@ -194,6 +229,7 @@ namespace FlighRewindClientWrapper
             }
             steram.Flush();
             steram.Close();
+#endif
         }
     }
 }
