@@ -17,7 +17,7 @@ namespace FlightRewinder.ClientWrapper
 
         List<int> RegisteredHotkeyIds = new List<int>();
 
-        public event EventHandler<HotkeyPressedEventArgs>? KeyPressed;
+        public event EventHandler<HotkeyPressedEventArgs>? HotKeyInputReceived;
 
         public IntPtr WindowHandle;
 
@@ -39,7 +39,8 @@ namespace FlightRewinder.ClientWrapper
             int id = (UInt16)wParam;
             uint key = (uint)((long)iParam >> 16);
             uint mod = (UInt16)iParam;
-            KeyPressed?.Invoke(this, new(id, key, mod));
+
+            HotKeyInputReceived?.Invoke(this, new(id, key, mod));
         }
 
         public bool UnregisterHotKey(int id) 

@@ -32,7 +32,11 @@ namespace FlighRewindClientWrapper
 
         private void _simConnection_Initialised(object? sender, EventArgs e)
         {
-            DefaultTextBlock.Text = "Connected.";
+            if (_recorder == null)
+            {
+                DefaultTextBlock.Text = "Setup Incomplete, Please Reconnect To Flight Simulator.";
+                return;
+            }
         }
         private void Button_Click_1(object sender, RoutedEventArgs e) => Setup();
         private IntPtr HandleHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr iParam, ref bool handled)
@@ -62,16 +66,17 @@ namespace FlighRewindClientWrapper
             Handle = new WindowInteropHelper(this).Handle;
             _simConnection = new Connection();
             _hotkeyHandler = new Hotkeys(Handle);
-            _hotkeyHandler.KeyPressed += _hotkeyHandler_KeyPressed;
-            _simConnection.Initialised += _simConnection_Initialised;
+
             var handleSource = HwndSource.FromHwnd(Handle);
             handleSource.AddHook(HandleHook);
+
             _rewinder = new Rewind(_simConnection);
             _recorder = new Recorder(_simConnection);
             RegisterHotkeys();
 
             try
             {
+                _simConnection.Initialised += _simConnection_Initialised;
                 _simConnection.Initialise(Handle);
                 AddEvents();
             }
@@ -92,13 +97,19 @@ namespace FlighRewindClientWrapper
             }
         }
 
-        private void _hotkeyHandler_KeyPressed(object? sender, HotkeyPressedEventArgs e)
+        private void _hotkeyHandler_InputReceived(object? sender, HotkeyPressedEventArgs e)
         {
             if (e == null)
                 return;
-            if (e.HotkeyID < 1 || e.HotkeyID > 2)
-                return;
-            SetReplay(e.HotkeyID == 1);
+            switch (e.HotkeyID)
+            {
+                case 1:
+                    StartReplaying();
+                    break;
+                case 2:
+                    StopReplay();
+                    break;
+            }
         }
 
         //Make a method for rewinding, stop recording, dump the data and start playing it in reverse.
@@ -123,51 +134,62 @@ namespace FlighRewindClientWrapper
             _recorder?.RestartRecording();
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            SetReplay(true);
-        }
-
-        public void SetReplay(bool state)
+        private void Button_Click_3(object sender, RoutedEventArgs e) => StartReplaying();
+        public void StartReplaying()
         {
             if (_recorder != null && _rewinder != null)
             {
-                if (state)
+                if (_rewinder.Playing)
+                    return;
+                if (_recorder.Recording)
+                    _recorder.StopRecording();
+                var data = _recorder.DumpData();
+                try
                 {
-                    if (_rewinder.Playing)
-                        return;
-                    if (_recorder.Recording)
-                        _recorder.StopRecording();
-                    var data = _recorder.DumpData();
-                    try
+                    if (data?.Frames != null)
                     {
-                        if (data?.Frames != null)
-                        {
-                            _rewinder.LoadFrames(data.Frames);
-                            _rewinder.StartRewind();
-                        }
-                    }
-                    catch (NullReferenceException)
-                    {
-                        DefaultTextBlock.Text = "Cannot start replay.";
-#if DEBUG
-                        throw;
-#endif
+                        _rewinder.LoadFrames(data.Frames);
+                        _rewinder.StartRewind();
                     }
                 }
-                else
+                catch (NullReferenceException)
                 {
-                    if (_rewinder.Playing)
-                    {
-                        _rewinder.StopReplay();
-                        _recorder.StartRecording();
-                    }
+                    DefaultTextBlock.Text = "Cannot start replay.";
+#if DEBUG
+                    throw;
+#endif
+                }
+            }
+        }
+
+        public void StartRecording()
+        {
+            DefaultTextBlock.Text = "Recording Started";
+            _recorder?.StartRecording();
+        }
+
+        public void StopRecording()
+        {
+            _recorder?.StopRecording();
+        }
+
+        public void StopReplay()
+        {
+            if(_recorder != null && _rewinder != null)
+            {
+                if (_rewinder.Playing)
+                {
+                    _rewinder.StopReplay();
                 }
             }
         }
 
         public void AddEvents()
         {
+            if(_hotkeyHandler != null)
+            {
+                _hotkeyHandler.HotKeyInputReceived += _hotkeyHandler_InputReceived;
+            }
             if (_rewinder != null)
             {
                 _rewinder.FrameFinished += FrameChanged;
@@ -181,7 +203,7 @@ namespace FlighRewindClientWrapper
 
         private void _rewinder_ReplayStopped(object? sender, EventArgs e)
         {
-            _recorder?.StartRecording();
+            StartRecording();
         }
 
         private void _simConnection_LocationChanged(object? sender, LocationChangedEventArgs e)

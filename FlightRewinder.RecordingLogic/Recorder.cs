@@ -85,7 +85,7 @@ namespace FlightRewinderRecordingLogic
             long currentFrame = watch.ElapsedMilliseconds - OffsetCorrection;
             var nextFrame = new RecordedFrame(postion, currentFrame);
             ListOfFrames.Add(nextFrame);
-            RecorderUpdated?.Invoke(this, new(nextFrame));
+            RecorderUpdated?.Invoke(this, new(nextFrame, ListOfFrames.Count-1));
         }
 
         public void RemoveFrame(int index)
