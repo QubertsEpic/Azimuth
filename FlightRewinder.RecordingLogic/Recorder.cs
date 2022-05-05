@@ -90,8 +90,6 @@ namespace FlightRewinderRecordingLogic
                 throw new InvalidOperationException("Recording hasn't started.");
             long currentFrame = watch.ElapsedMilliseconds - OffsetCorrection;
             var nextFrame = new RecordedFrame(postion, currentFrame);
-            if (ListOfFrames.Count - 2 > MaxIndex)
-                ListOfFrames.RemoveAt(0);
             ListOfFrames.Add(nextFrame);
             RecorderUpdated?.Invoke(this, new(nextFrame, ListOfFrames.Count - 1));
         }

@@ -26,7 +26,6 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <TextBlock Text="State: Idle" x:Name="StateTextBox" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30"/>
-            <TextBlock Text="Max Frames: 2000" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" FontSize="15"/>
             
         </Grid>
         
