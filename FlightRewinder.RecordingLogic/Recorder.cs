@@ -10,6 +10,8 @@ namespace FlightRewinderRecordingLogic
     public class Recorder
     {
         public event EventHandler<RecorderUpdatedEventArgs>? RecorderUpdated;
+        public event EventHandler? RecordingStarted;
+        public event EventHandler? RecordingStopped;
 
         public List<RecordedFrame>? ListOfFrames = new List<RecordedFrame>();
         public Stopwatch watch = Stopwatch.StartNew();
@@ -43,7 +45,7 @@ namespace FlightRewinderRecordingLogic
         {
             if (add)
             {
-                if(!linked)
+                if (!linked)
                 {
                     connectionInstance.LocationChanged += OnLocationUpdated;
                     linked = true;
@@ -61,8 +63,12 @@ namespace FlightRewinderRecordingLogic
 
         public void StartRecording()
         {
-            OffsetCorrection += watch.ElapsedMilliseconds - PauseTime;
+            if (ListOfFrames != null && ListOfFrames.Any() == true)
+                OffsetCorrection += watch.ElapsedMilliseconds - (ListOfFrames[ListOfFrames.Count - 1].Time);
+            else
+                OffsetCorrection = 0;
             ChangeEvents(true);
+            RecordingStarted?.Invoke(this, new());
         }
 
         public void Seek(int index, bool removeAhead = true)
@@ -84,8 +90,10 @@ namespace FlightRewinderRecordingLogic
                 throw new InvalidOperationException("Recording hasn't started.");
             long currentFrame = watch.ElapsedMilliseconds - OffsetCorrection;
             var nextFrame = new RecordedFrame(postion, currentFrame);
+            if (ListOfFrames.Count - 2 > MaxIndex)
+                ListOfFrames.RemoveAt(0);
             ListOfFrames.Add(nextFrame);
-            RecorderUpdated?.Invoke(this, new(nextFrame, ListOfFrames.Count-1));
+            RecorderUpdated?.Invoke(this, new(nextFrame, ListOfFrames.Count - 1));
         }
 
         public void RemoveFrame(int index)
@@ -115,6 +123,7 @@ namespace FlightRewinderRecordingLogic
         {
             PauseTime = watch.ElapsedMilliseconds;
             ChangeEvents(false);
+            RecordingStopped?.Invoke(this, new());
         }
 
         public SaveData DumpData()

@@ -36,12 +36,12 @@ namespace FlightRewinder.Structs
 
             foreach ((string type, string name) in fields)
             {
-                builder.Append($@"
+                builder.Append($@" 
         public {type} {name};");
             }
 
-            builder.Append(
-  @"}
+            builder.Append(@" 
+    }
 }
 ");
 
@@ -66,14 +66,13 @@ namespace FlightRewinder.Structs
     public partial class PositionStructOperators
     {
         public static partial PositionSetStruct ToSet(PositionStruct values)
-        => new PositionSetStruct(){
-
+        => new PositionSetStruct() {
 ");
             foreach (var field in fields)
             {
-                builder.Append($"{field.name} = values.{field.name},");
+                builder.Append($"\n{field.name} = values.{field.name},");
             }
-            builder.Append(@"
+            builder.Append(@" 
         };"
 );
             builder.Append(@"
@@ -85,16 +84,16 @@ namespace FlightRewinder.Structs
                 switch (field.type)
                 {
                     case "double":
-                        builder.Append($"{field.name} = interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation),");
+                        builder.Append($"\n{field.name} = interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation),");
                         break;
                     case "int":
-                        builder.Append($"{field.name} = (int) Math.Round(interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation)),");
+                        builder.Append($"\n{field.name} = (int) Math.Round(interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation)),");
                         break;
                     case "uint":
-                        builder.Append($" {field.name} = (uint) Math.Round(interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation)),");
+                        builder.Append($"\n{field.name} = (uint) Math.Round(interpolation * newPosition.{field.name} + oldPosition.{field.name} * (1-interpolation)),");
                         break;
                     default:
-                        builder.Append($" {field.name} = oldPosition.{field.name}");
+                        builder.Append($"\n{field.name} = oldPosition.{field.name}");
                         break;
                 }
             }
@@ -110,16 +109,16 @@ namespace FlightRewinder.Structs
                 switch (field.type)
                 {
                     case "double":
-                        builder.Append($"{field.name} = position.{field.name} * factor,");
+                        builder.Append($"\n{field.name} = position.{field.name} * factor,");
                         break;
                     case "int":
-                        builder.Append($"{field.name} = (int) (position.{field.name} * factor),");
+                        builder.Append($"\n{field.name} = (int) (position.{field.name} * factor),");
                         break;
                     case "uint":
-                        builder.Append($" {field.name} = (uint) (position.{field.name} * factor),");
+                        builder.Append($"\n{field.name} = (uint) (position.{field.name} * factor),");
                         break;
                     default:
-                        builder.Append($" {field.name} = position.{field.name},");
+                        builder.Append($"\n{field.name} = position.{field.name},");
                         break;
                 }
             }
@@ -135,13 +134,13 @@ namespace FlightRewinder.Structs
                 switch (field.type)
                 {
                     case "double":
-                        builder.Append($"{field.name} = first.{field.name} + second.{field.name},");
+                        builder.Append($"\n{field.name} = first.{field.name} + second.{field.name},");
                         break;
                     case "int":
-                        builder.Append($"{field.name} = first.{field.name} + second.{field.name},");
+                        builder.Append($"\n{field.name} = first.{field.name} + second.{field.name},");
                         break;
                     case "uint":
-                        builder.Append($"{field.name} = first.{field.name} + second.{field.name},");
+                        builder.Append($"\n{field.name} = first.{field.name} + second.{field.name},");
                         break;
                     default:
 
@@ -149,18 +148,10 @@ namespace FlightRewinder.Structs
                         
                 }
             }
-            builder.Append("};");
+            builder.Append("\n};");
 
-            builder.Append(@"
-        public static string GetString(PositionStruct data) => 
-            $""");
-            foreach((string type, string name) in fields)
-            {
-                builder.Append($"{name}: {{data.{name}}} ");
-            }
-            builder.Append(@""";");
 
-            builder.Append("}}");
+            builder.Append("\n}\n}");
 
             context.AddSource("Operators", builder.ToString());
         }

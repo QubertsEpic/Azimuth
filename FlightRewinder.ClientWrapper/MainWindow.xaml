@@ -5,10 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="250" Width="400">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
@@ -20,45 +19,19 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" x:Name="DefaultTextBlock" Text="Placeholder" FontSize="20px" HorizontalAlignment="Center" Foreground="Black"/>
-        <Grid Grid.Row="1" Grid.ColumnSpan="5">
-            <Grid.Resources>
-                <Style x:Key="Base" TargetType="{x:Type FrameworkElement}">
-                    <Setter Property="Control.Margin" Value="10"/>
-                </Style>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource Base}"/>
-                <Style TargetType="TextBox" BasedOn="{StaticResource Base}"/>
-            </Grid.Resources>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" x:Name="DefaultTextBlock" Text="Waiting..." FontSize="13px" HorizontalAlignment="Center" Foreground="Black"/>
+        <Grid Grid.Row="1" Grid.ColumnSpan="3">
             <Grid.RowDefinitions>
                 <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-
-            <TextBlock Grid.Column="0" Text="Altitude"/>
-            <TextBox IsEnabled="False" FontSize="20px" Grid.Column="1" x:Name="AltitudeBox"/>
-            <TextBlock Grid.Column="0" Grid.Row="1" Text="Latitude"/>
-            <TextBox IsEnabled="False" FontSize="20px" Grid.Column="1" Grid.Row="1" x:Name="LatitudeBox"/>
-            <TextBlock Grid.Row="2" Text="Longitude"/>
-            <TextBox IsEnabled="False" FontSize="20px" Grid.Row="2" Grid.Column="1" x:Name="LongitudeBox"/>
-            <TextBlock Text="Pitch" Grid.Row="3"/>
-            <TextBox IsEnabled="False" FontSize="20px" Grid.Row="3" Grid.Column="1" x:Name="PitchBox"/>
-            <TextBlock Grid.Row="4" Text="Bank"/>
-            <TextBox IsEnabled="False" FontSize="20px" Grid.Row="4" Grid.Column="1" x:Name="BankBox"/>
-            <TextBlock Grid.Row="5" Text="Heading"/>
-            <TextBox IsEnabled="False" FontSize="20px" Grid.Row="5" Grid.Column="1" x:Name="HeadingBox"/>
+            <TextBlock Text="State: Idle" x:Name="StateTextBox" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30"/>
+            <TextBlock Text="Max Frames: 2000" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" FontSize="15"/>
+            
         </Grid>
         
-        <Button Grid.Row="2" Grid.Column="0" Margin="10" FontSize="20px" Content="Connect" Click="Button_Click_1"/>
-        <Button Grid.Row="2" Grid.Column="1" Margin="10" FontSize="20px" Content="Start Recording" Click="Button_Click"/>
-        <Button Grid.Row="2" Grid.Column="2" Margin="10" FontSize="20px" Content="Start Replay" Click="Button_Click_3"/>
-        <Button Grid.Row="2" Grid.Column="3" Margin="10" FontSize="15px" Content="Dump Data (Debug Only)" Click="Button_Click_4"/>
+        <Button x:Name="StartButton" Grid.Row="2" Grid.Column="0" Margin="10" Content="Start/Restart" Click="RestartButtonClick" ToolTip="Restarts The Recording"/>
+        <Button x:Name="ReplayButton" Grid.Row="2" Grid.Column="1" Margin="10" Content="Start Replay" Click="ReplayButtonClick" ToolTip="Start Replay (Ctrl+Shift+M)"/>
+        <Button x:Name="ReplayStopButton" Grid.Row="2" Grid.Column="2" Margin="10" Content="Stop Replay" Click="ReplayStopButtonClick" ToolTip="Stop Replay (Ctrl+Shift+N)"/>
     </Grid>
 </Window>

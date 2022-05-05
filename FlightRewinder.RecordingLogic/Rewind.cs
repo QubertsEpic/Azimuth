@@ -15,6 +15,7 @@ namespace FlightRewinderRecordingLogic
         public Recorder RecorderInstance;
 
         public event EventHandler<ReplayFrameChangedEventArgs>? FrameFinished;
+        public event EventHandler? ReplayStarted;
         public event EventHandler? ReplayStopped;
 
         public double RewindRate = 1;
@@ -42,7 +43,6 @@ namespace FlightRewinderRecordingLogic
             if (!Playing && PauseTime.HasValue)
             {
                 Correction += Watch.ElapsedMilliseconds - PauseTime.Value;
-                Playing = true;
             }
         }
 
@@ -99,11 +99,13 @@ namespace FlightRewinderRecordingLogic
             {
                 throw new IndexOutOfRangeException("Cannot use null currentFrame index.");
             }
-            Playing = true;
             AddReferences();
+            Stopping = false;
             Watch.Restart();
 
-            Task.Run(StartReplaying);
+
+            new Thread(StartReplaying).Start();
+            ReplayStarted?.Invoke(this, new());
         }
 
         private void Instance_FrameEvent(object? sender, EventArgs e)
@@ -111,7 +113,7 @@ namespace FlightRewinderRecordingLogic
             Tick();
         }
 
-        private async Task StartReplaying()
+        private async void StartReplaying()
         {
             if (RecordedFrames == null)
                 return;
@@ -121,7 +123,7 @@ namespace FlightRewinderRecordingLogic
             PositionStruct? position = null;
             long lastTime = 0;
             long frameTime = startingTime;
-
+            Playing = true;
             while (true)
             {
                 //Wait for a frame to pass.
@@ -137,6 +139,7 @@ namespace FlightRewinderRecordingLogic
 
                 if (Stopping)
                 {
+                    Stopping = false;
                     AbortReplay();
                     return;
                 }

@@ -6,6 +6,7 @@ namespace FlightRewinder.ClientWrapper
     {
         public int HotkeyID;
         public uint VirtualKey;
+        public ConsoleKey KeyCode => (ConsoleKey)VirtualKey; 
         public uint KeyModifier;
 
         public HotkeyPressedEventArgs(int id, uint key, uint mod)
