@@ -1,4 +1,4 @@
-# FlightRewinder
+# Azimuth - A Flight Rewinder
 
 ## A program for flight simulator that allows for rewinds.
 <br>
