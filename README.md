@@ -8,7 +8,7 @@ It allows the user to rewind their flight to a pre-recorded point, withouth the 
 
 ### Why have I made this?
 I'm using this primarily as a learning process for different ways to develop using C#. So, the quality of this particular project may not be the best.
-However, I'll be sure to make it does exactly what it should.
+However, I'll be sure it does exactly as it should.
 
 ### How does it work?
 After downloading and extracting the zip file, you simply load in a scenario in the Simulator, and then run the 'azimuth.exe' file. The program will launch, and all you need to do is press start. Fly to your heart's content, and if you want to start rewinding, hit CTRL + SHIFT + M, and when you want to resume normal flight, hit CTRL + SHIFT + N. It's that easy!
