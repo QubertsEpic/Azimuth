@@ -31,14 +31,13 @@ namespace Azimuth.RecordingLogic
             connectionInstance = connection;
         }
 
-        public void RestartRecording()
+        public void ResetRecording()
         {
             EndingTime = -1;
             PauseTime = 0;
             OffsetCorrection = 0;
             ListOfFrames = new List<RecordedFrame>();
             watch.Restart();
-            StartRecording();
         }
 
         public void ChangeEvents(bool add)

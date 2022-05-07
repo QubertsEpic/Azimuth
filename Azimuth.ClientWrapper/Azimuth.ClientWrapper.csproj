@@ -6,7 +6,13 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64</Platforms>
+    <AssemblyName>Azimuth</AssemblyName>
+    <ApplicationIcon>transparent.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="transparent.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Azimuth.Data\Azimuth.Data.csproj" />

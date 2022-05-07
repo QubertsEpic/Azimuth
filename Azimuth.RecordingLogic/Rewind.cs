@@ -1,14 +1,11 @@
 ﻿using Azimuth.Classes;
 using Azimuth.Data.DataEventArgs;
-using Azimuth.RecordingLogic;
 using Azimuth.Structs;
 using SimConnectWrapper.Core;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 
-namespace AzimuthRecordingLogic
+namespace Azimuth.RecordingLogic
 {
     public class Rewind
     {
@@ -25,12 +22,12 @@ namespace AzimuthRecordingLogic
         public int CurrentFrame = 0;
         public Stopwatch Watch = Stopwatch.StartNew();
 
-        public bool Playing;
+        public bool ServiceRunning => RewindThread.IsAlive;
         private bool Stopping = false;
         public PositionStruct StartingPosition;
 
         private TaskCompletionSource<bool>? tick;
-
+        private Thread RewindThread;
         public List<RecordedFrame>? RecordedFrames { get; private set; }
 
         public Rewind(Connection instance)
@@ -41,7 +38,7 @@ namespace AzimuthRecordingLogic
 
         public void ResumeRewind()
         {
-            if (!Playing && PauseTime.HasValue)
+            if (!ServiceRunning && PauseTime.HasValue)
             {
                 Correction += Watch.ElapsedMilliseconds - PauseTime.Value;
             }
@@ -59,16 +56,15 @@ namespace AzimuthRecordingLogic
 
         public void PauseRewind()
         {
-            if (Playing)
+            if (ServiceRunning)
             {
                 PauseTime = Watch.ElapsedMilliseconds;
-                Playing = false;
             }
         }
 
         public void StopReplay()
         {
-            if (Playing)
+            if (ServiceRunning)
             {
                 Stopping = true;
             }
@@ -87,7 +83,10 @@ namespace AzimuthRecordingLogic
 
         public void SeekRewind(int framePosition)
         {
-            CurrentFrame = framePosition;
+            if (framePosition < RecordedFrames?.Count || framePosition > -1)
+            {
+                CurrentFrame = framePosition;
+            }
         }
 
         public void StartRewind()
@@ -124,19 +123,12 @@ namespace AzimuthRecordingLogic
             PositionStruct? position = null;
             long lastTime = 0;
             long frameTime = startingTime;
-            Playing = true;
             while (true)
             {
                 //Wait for a frame to pass.
                 tick = new TaskCompletionSource<bool>();
                 await tick.Task;
                 tick = null;
-
-                if (!Playing)
-                {
-                    //Paused.
-                    continue;
-                }
 
                 if (Stopping)
                 {
@@ -182,14 +174,13 @@ namespace AzimuthRecordingLogic
 
         public void AbortReplay()
         {
-            Playing = false;
             ReplayStopped?.Invoke(this, new());
             RemoveReferences();
         }
 
         private void Tick()
         {
-            if (Playing)
+            if (ServiceRunning)
             {
                 tick?.SetResult(true);
             }

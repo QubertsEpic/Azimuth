@@ -1,7 +1,7 @@
 ﻿using Azimuth.ClientWrapper;
+using Azimuth.ClientWrapper.Logic;
 using Azimuth.Data.DataEventArgs;
 using Azimuth.RecordingLogic;
-using AzimuthRecordingLogic;
 using Microsoft.FlightSimulator.SimConnect;
 using SimConnectWrapper.Core;
 using SimConnectWrapper.Core.SimEventArgs;
@@ -24,6 +24,7 @@ namespace FlighRewindClientWrapper
         Rewind? _rewinder;
         Hotkeys? _hotkeyHandler;
         IntPtr Handle;
+        StateMachine _stateMachine;
         string State
         {
             set
@@ -118,17 +119,17 @@ namespace FlighRewindClientWrapper
             ReplayStopButton.IsEnabled = status;
         }
 
-        private void _hotkeyHandler_InputReceived(object? sender, HotkeyPressedEventArgs e)
+        private async void _hotkeyHandler_InputReceived(object? sender, HotkeyPressedEventArgs e)
         {
             if (e == null)
                 return;
             switch (e.HotkeyID)
             {
                 case 1:
-                    StartReplaying();
+                    await _stateMachine.TransitionAsync(StateMachine.Event.Replay);
                     break;
                 case 2:
-                    StopReplay();
+                    await _stateMachine.TransitionAsync(StateMachine.Event.Record);
                     break;
             }
         }
@@ -148,76 +149,6 @@ namespace FlighRewindClientWrapper
         }
 
 
-        public void StartReplaying()
-        {
-            if (_recorder != null && _rewinder != null)
-            {
-                if (_rewinder.Playing)
-                    return;
-                if (_recorder.Recording)
-                    _recorder.StopRecording();
-                var data = _recorder.DumpData();
-                try
-                {
-                    if (data?.Frames != null)
-                    {
-                        _rewinder.LoadFrames(data.Frames);
-                        _rewinder.SeekRewind(data.Frames.Count - 1);
-                        _rewinder.StartRewind();
-                    }
-                }
-                catch (NullReferenceException)
-                {
-                    DefaultTextBlock.Text = "Cannot start replay.";
-#if DEBUG
-                    throw;
-#endif
-                }
-            }
-        }
-
-        public void CheckState()
-        {
-            if (_rewinder?.Playing == true)
-            {
-                State = Rewinding;
-                return;
-            }
-
-            if (_recorder?.Recording == true)
-            {
-                State = Recording;
-                return;
-            }
-            State = Idle;
-        }
-
-        public void StartRecording()
-        {
-            _recorder?.StartRecording();
-        }
-
-        public void StopRecording()
-        {
-            _recorder?.StopRecording();
-        }
-
-        public void StopReplay()
-        {
-            if (_recorder != null && _rewinder != null)
-            {
-                if (_rewinder.Playing)
-                {
-                    _rewinder.StopReplay();
-                }
-            }
-        }
-        private void StopReplayStartRecording()
-        {
-            StopReplay();
-            StartRecording();
-        }
-
         public void AddEvents()
         {
             if (_hotkeyHandler != null)
@@ -231,20 +162,13 @@ namespace FlighRewindClientWrapper
             }
         }
 
-        private void RestartButtonClick(object sender, RoutedEventArgs e) 
-        { 
-            _recorder?.RestartRecording();
-            State = "Running";
-        }
-        
-        private void ReplayButtonClick(object sender, RoutedEventArgs e) => StartReplaying();
-        private void ReplayStopButtonClick(object sender, RoutedEventArgs e) => StopReplayStartRecording();
+        private async void RestartButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.RestartRecording);
+
+        private async void ReplayButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Replay);
+        private async void ReplayStopButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.StopReplaying);
         private void Window_Loaded(object sender, RoutedEventArgs e) => InitSetup();
 
-        private void _rewinder_ReplayStopped(object? sender, EventArgs e)
-        {
-            StartRecording();
-        }
+        private async void _rewinder_ReplayStopped(object? sender, EventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Record);
 
 
         public void FrameChanged(object? sender, ReplayFrameChangedEventArgs args)

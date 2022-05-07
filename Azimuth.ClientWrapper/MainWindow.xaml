@@ -26,7 +26,24 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <TextBlock Text="State: Idle" x:Name="StateTextBox" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30"/>
-            
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.ColumnSpan="4" VerticalAlignment="Center" Text="Replay Rate" HorizontalAlignment="Center"/>
+                <Button x:Name="Rate0_5" Content="x0.5" Grid.Row="1" />
+                <Button x:Name="Rate1" Content="x1" Grid.Row="1" Grid.Column="1"/>
+                <Button x:Name="Rate2" Content="x2" Grid.Row="1" Grid.Column="2"/>
+                <Button x:Name="Rate4" Content="x4" Grid.Row="1" Grid.Column="3" />
+
+            </Grid>
         </Grid>
         
         <Button x:Name="StartButton" Grid.Row="2" Grid.Column="0" Margin="10" Content="Start/Restart" Click="RestartButtonClick" ToolTip="Restarts The Recording"/>
