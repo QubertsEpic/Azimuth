@@ -66,24 +66,17 @@ namespace Azimuth.ClientWrapper.Logic
             foreach(var via in viaEvents)
             {
                 var oldState = CurrentState;
-                var newState = await RegisteredTransitions[via][CurrentState].Execute();
-
-                if (newState.HasValue)
-                {
-                    CurrentState = newState.Value;
-                }
-                else
-                {
-                    successful = false;
-                }
-
+                successful = await TransitionAsync(via);
             }
             return successful;
         }
 
         public async Task RevertTransition(StateMachine.State originalState, StateMachine.Event originatingEvent, List<StateMachine.Event> transitioningEvents)
         {
+            if (CurrentState != originalState)
+            {
 
+            }
         } 
 
         public void Register(Transition transition)

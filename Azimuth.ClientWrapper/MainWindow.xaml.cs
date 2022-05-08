@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -82,7 +83,7 @@ namespace FlighRewindClientWrapper
             _simConnection = new Connection();
             _rewinder = new Rewind(_simConnection);
             _recorder = new Recorder(_simConnection);
-
+            _stateMachine = new StateMachine(_recorder, _rewinder);
             try
             {
                 _simConnection.Initialised += _simConnection_Initialised;
@@ -117,6 +118,7 @@ namespace FlighRewindClientWrapper
             StartButton.IsEnabled = status;
             ReplayButton.IsEnabled = status;
             ReplayStopButton.IsEnabled = status;
+            ReplayRateButton.IsEnabled = status;
         }
 
         private async void _hotkeyHandler_InputReceived(object? sender, HotkeyPressedEventArgs e)
@@ -126,7 +128,7 @@ namespace FlighRewindClientWrapper
             switch (e.HotkeyID)
             {
                 case 1:
-                    await _stateMachine.TransitionAsync(StateMachine.Event.Replay);
+                    await _stateMachine.TransitionAsync(StateMachine.Event.Rewind);
                     break;
                 case 2:
                     await _stateMachine.TransitionAsync(StateMachine.Event.Record);
@@ -164,9 +166,19 @@ namespace FlighRewindClientWrapper
 
         private async void RestartButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.RestartRecording);
 
-        private async void ReplayButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Replay);
-        private async void ReplayStopButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.StopReplaying);
+        private async void ReplayButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Rewind);
+        private async void ReplayStopButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.StopRewinding);
         private void Window_Loaded(object sender, RoutedEventArgs e) => InitSetup();
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if((sender as MenuItem)?.Header is string header && double.TryParse(header.Substring(1), out var rate))
+            {
+                ReplayRateButton.Content = header;
+                if(_rewinder != null)
+                    _rewinder.RewindRate = rate;
+            }
+        }
 
         private async void _rewinder_ReplayStopped(object? sender, EventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Record);
 

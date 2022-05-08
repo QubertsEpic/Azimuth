@@ -25,8 +25,8 @@ namespace Azimuth.ClientWrapper.Logic
             Null,
             Record,
             StopRecording,
-            Replay,
-            StopReplaying,
+            Rewind,
+            StopRewinding,
             RestartRecording,
             ResetRecordings
         }
@@ -35,20 +35,21 @@ namespace Azimuth.ClientWrapper.Logic
         {
             _recordingLogic = recordingLogic;
             _rewindLogic = rewindingLogic;
+            RegisterTransitions();
         }
 
         public void RegisterTransitions()
         {
             Register(new Transition().From(State.Start).To(State.Recording).Event(Event.Record).Do(StartRecording));
             Register(new Transition().From(State.Idle).To(State.Recording).Event(Event.Record).Do(StartRecording));
-            Register(new Transition().From(State.Replaying).To(State.Recording).Event(Event.Record).Via((Event.StopReplaying)).Do(StartRecording));
+            Register(new Transition().From(State.Replaying).To(State.Recording).Event(Event.Record).Via((Event.StopRewinding), Event.Record));
             Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.RestartRecording).Via(Event.StopRecording, Event.ResetRecordings, Event.Record));
 
-            Register(new Transition().From(State.Idle).To(State.Replaying).Event(Event.Replay).Do(StartRewinding));
-            Register(new Transition().From(State.Recording).To(State.Replaying).Event(Event.Replay).Via(Event.StopRecording).Do(StartRewinding));
+            Register(new Transition().From(State.Idle).To(State.Replaying).Event(Event.Rewind).Do(StartRewinding));
+            Register(new Transition().From(State.Recording).To(State.Replaying).Event(Event.Rewind).Via(Event.StopRecording, Event.Rewind));
 
             Register(new Transition().From(State.Idle).To(State.Idle).Event(Event.ResetRecordings).Do(ResetRecordings));
-            Register(new Transition().From(State.Replaying).To(State.Idle).Event(Event.StopReplaying).Do(StopReplaying));
+            Register(new Transition().From(State.Replaying).To(State.Idle).Event(Event.StopRewinding).Do(StopReplaying));
             Register(new Transition().From(State.Recording).To(State.Idle).Event(Event.StopRecording).Do(StopRecording));
         }
 
@@ -58,13 +59,13 @@ namespace Azimuth.ClientWrapper.Logic
             return true;
         }
 
-        public bool StopRecording()
+        private bool StopRecording()
         {
             _recordingLogic.StopRecording();
             return true;
         }
 
-        public bool StartRewinding()
+        private bool StartRewinding()
         {
             var data = _recordingLogic.DumpData();
             if (data?.Frames != null)
@@ -77,13 +78,13 @@ namespace Azimuth.ClientWrapper.Logic
             return false;
         }
 
-        public bool StopReplaying()
+        private bool StopReplaying()
         {
             _rewindLogic.StopReplay();
             return true;
         }
 
-        public bool StartRecording()
+        private bool StartRecording()
         {
             _recordingLogic.StartRecording();
             return true;

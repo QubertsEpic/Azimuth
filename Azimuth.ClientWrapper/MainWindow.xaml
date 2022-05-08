@@ -28,20 +28,27 @@
             <TextBlock Text="State: Idle" x:Name="StateTextBox" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="30"/>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
-                    <RowDefinition/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.ColumnSpan="4" VerticalAlignment="Center" Text="Replay Rate" HorizontalAlignment="Center"/>
-                <Button x:Name="Rate0_5" Content="x0.5" Grid.Row="1" />
-                <Button x:Name="Rate1" Content="x1" Grid.Row="1" Grid.Column="1"/>
-                <Button x:Name="Rate2" Content="x2" Grid.Row="1" Grid.Column="2"/>
-                <Button x:Name="Rate4" Content="x4" Grid.Row="1" Grid.Column="3" />
+                <TextBlock VerticalAlignment="Center" Text="Replay Rate: " HorizontalAlignment="Center"/>
+                <Button x:Name="ReplayRateButton" Margin="1,0,0,0" Content="x0.5" Grid.Column="1">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="x0.5" Click="MenuItem_Click"/>
+                            <MenuItem Header="x0.75" Click="MenuItem_Click"/>
+                            <Separator/>
+                            <MenuItem Header="x1" Click="MenuItem_Click"/>
+                            <Separator/>
+                            <MenuItem Header="x1.5" Click="MenuItem_Click"/>
+                            <MenuItem Header="x2" Click="MenuItem_Click"/>
+                            <MenuItem Header="x4" Click="MenuItem_Click"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
 
             </Grid>
         </Grid>
