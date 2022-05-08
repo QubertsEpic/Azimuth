@@ -41,12 +41,16 @@ namespace Azimuth.ClientWrapper.Logic
         public void RegisterTransitions()
         {
             Register(new Transition().From(State.Start).To(State.Recording).Event(Event.Record).Do(StartRecording));
+            Register(new Transition().From(State.Start).To(State.Recording).Via(Event.Record).Event(Event.RestartRecording));
+
             Register(new Transition().From(State.Idle).To(State.Recording).Event(Event.Record).Do(StartRecording));
-            Register(new Transition().From(State.Replaying).To(State.Recording).Event(Event.Record).Via((Event.StopRewinding), Event.Record));
+            Register(new Transition().From(State.Replaying).To(State.Recording).Event(Event.Record).Via(Event.StopRewinding, Event.Record));
             Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.RestartRecording).Via(Event.StopRecording, Event.ResetRecordings, Event.Record));
+            Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.Record));
 
             Register(new Transition().From(State.Idle).To(State.Replaying).Event(Event.Rewind).Do(StartRewinding));
             Register(new Transition().From(State.Recording).To(State.Replaying).Event(Event.Rewind).Via(Event.StopRecording, Event.Rewind));
+            Register(new Transition().From(State.Replaying).To(State.Replaying).Event(Event.Rewind));
 
             Register(new Transition().From(State.Idle).To(State.Idle).Event(Event.ResetRecordings).Do(ResetRecordings));
             Register(new Transition().From(State.Replaying).To(State.Idle).Event(Event.StopRewinding).Do(StopReplaying));
@@ -71,7 +75,7 @@ namespace Azimuth.ClientWrapper.Logic
             if (data?.Frames != null)
             {
                 _rewindLogic.LoadFrames(data.Frames);
-                _rewindLogic.SeekRewind(data.Frames.Count - 1);
+                _rewindLogic.SeekRewind(data.Frames.Count-1);
                 _rewindLogic.StartRewind();
                 return true;
             }

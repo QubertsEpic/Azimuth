@@ -39,7 +39,7 @@ namespace Azimuth.ClientWrapper.Logic
             }
         }
 
-        public async Task<bool> SingleEventTransition(Transition transition)
+        private async Task<bool> SingleEventTransition(Transition transition)
         {
             var originalState = CurrentState;
             var successful = true;
@@ -58,7 +58,7 @@ namespace Azimuth.ClientWrapper.Logic
             return successful;
         }
 
-        public async Task<bool> MultiEventTransition(StateMachine.Event originatingEvent, StateMachine.Event[] viaEvents)
+        private async Task<bool> MultiEventTransition(StateMachine.Event originatingEvent, StateMachine.Event[] viaEvents)
         {
             var originalState = CurrentState;
             var successful = true;
@@ -71,13 +71,24 @@ namespace Azimuth.ClientWrapper.Logic
             return successful;
         }
 
-        public async Task RevertTransition(StateMachine.State originalState, StateMachine.Event originatingEvent, List<StateMachine.Event> transitioningEvents)
+        private async Task RevertPreviousState(StateMachine.State originalState)
         {
-            if (CurrentState != originalState)
+            foreach(var even in RegisteredTransitions)
             {
-
+                foreach(var transition in even.Value)
+                {
+                    if(transition.Value.ToState == originalState && transition.Value.FromState == CurrentState && transition.Value.Via == null)
+                    {
+                        await TransitionAsync(transition.Value.Cause);
+                        return;
+                    }
+                }
             }
-        } 
+
+            //This isn't safe, but whatever.
+            CurrentState = originalState;
+
+        }
 
         public void Register(Transition transition)
         {

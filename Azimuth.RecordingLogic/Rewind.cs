@@ -17,31 +17,22 @@ namespace Azimuth.RecordingLogic
         public event EventHandler? ReplayStopped;
 
         public double RewindRate = 1;
-        public long? PauseTime;
         public long Correction = 0;
         public int CurrentFrame = 0;
+        public long? ReplayTime;
         public Stopwatch Watch = Stopwatch.StartNew();
 
-        public bool ServiceRunning => RewindThread.IsAlive;
+        public bool Playing => ReplayTime != null;
         private bool Stopping = false;
         public PositionStruct StartingPosition;
 
         private TaskCompletionSource<bool>? tick;
-        private Thread RewindThread;
         public List<RecordedFrame>? RecordedFrames { get; private set; }
 
         public Rewind(Connection instance)
         {
             Instance = instance;
             RecorderInstance = new Recorder(Instance);
-        }
-
-        public void ResumeRewind()
-        {
-            if (!ServiceRunning && PauseTime.HasValue)
-            {
-                Correction += Watch.ElapsedMilliseconds - PauseTime.Value;
-            }
         }
 
         public void AddReferences()
@@ -54,17 +45,9 @@ namespace Azimuth.RecordingLogic
             Instance.FrameEvent -= Instance_FrameEvent;
         }
 
-        public void PauseRewind()
-        {
-            if (ServiceRunning)
-            {
-                PauseTime = Watch.ElapsedMilliseconds;
-            }
-        }
-
         public void StopReplay()
         {
-            if (ServiceRunning)
+            if (Playing)
             {
                 Stopping = true;
             }
@@ -101,11 +84,10 @@ namespace Azimuth.RecordingLogic
             }
             AddReferences();
             Stopping = false;
-            Watch.Restart();
+            ReplayTime = Watch.ElapsedMilliseconds;
 
-
-            new Thread(StartReplaying).Start();
             ReplayStarted?.Invoke(this, new());
+            Task.Run(StartReplaying);
         }
 
         private void Instance_FrameEvent(object? sender, EventArgs e)
@@ -123,12 +105,19 @@ namespace Azimuth.RecordingLogic
             PositionStruct? position = null;
             long lastTime = 0;
             long frameTime = startingTime;
+
             while (true)
             {
                 //Wait for a frame to pass.
                 tick = new TaskCompletionSource<bool>();
                 await tick.Task;
                 tick = null;
+
+                var replayCorrection = ReplayTime;
+                if(replayCorrection == null)
+                {
+                    continue;
+                }
 
                 if (Stopping)
                 {
@@ -137,12 +126,12 @@ namespace Azimuth.RecordingLogic
                     return;
                 }
 
-                long currentTime = (long)((startingTime - (Watch.ElapsedMilliseconds - Correction)) * RewindRate);
+                long currenTime = (long)((startingTime - (Watch.ElapsedMilliseconds - replayCorrection.Value)) * RewindRate);
                 try
                 {
-                    while (currentTime < frameTime)
+                    while (ReplayTime < frameTime)
                     {
-                        FrameFinished?.Invoke(this, new(CurrentFrame, currentTime));
+                        FrameFinished?.Invoke(this, new(CurrentFrame, ReplayTime));
                         CurrentFrame -= 1;
 
                         if (CurrentFrame < 0)
@@ -167,20 +156,22 @@ namespace Azimuth.RecordingLogic
                 
                 if (position.HasValue && lastPosition.HasValue)
                 {
-                    MoveCraft(position, frameTime, lastPosition, lastTime, currentTime);
+                    MoveCraft(position, frameTime, lastPosition, lastTime, ReplayTime.Value);
                 }
             }
         }
 
         public void AbortReplay()
         {
+            ReplayTime = null;
+
             ReplayStopped?.Invoke(this, new());
             RemoveReferences();
         }
 
         private void Tick()
         {
-            if (ServiceRunning)
+            if (Playing)
             {
                 tick?.SetResult(true);
             }
