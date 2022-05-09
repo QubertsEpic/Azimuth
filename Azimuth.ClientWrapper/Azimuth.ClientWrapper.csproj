@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.UI.Xaml" Version="2.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Azimuth.Data\Azimuth.Data.csproj" />
     <ProjectReference Include="..\Azimuth.RecordingLogic\Azimuth.RecordingLogic.csproj" />
     <ProjectReference Include="..\Azimuth.SimConnectWrapper\Azimuth.SimConnectWrapper.csproj" />

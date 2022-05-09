@@ -48,7 +48,7 @@ namespace Azimuth.ClientWrapper.Logic
             Register(new Transition().From(State.Idle).To(State.Recording).Event(Event.Record).Do(StartRecording));
             Register(new Transition().From(State.Rewinding).To(State.Recording).Event(Event.Record).Via(Event.StopRewinding, Event.Record));
             Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.RestartRecording).Via(Event.StopRecording, Event.ResetRecordings, Event.Record));
-            Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.Record));
+            Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.Record).Via(Event.RestartRecording));
             Register(new Transition().From(State.Rewinding).To(State.Recording).Event(Event.RestartRecording).Via(Event.StopRecording, Event.RestartRecording, Event.Record));
             
             Register(new Transition().From(State.Idle).To(State.Rewinding).Event(Event.Rewind).Do(StartRewinding));
