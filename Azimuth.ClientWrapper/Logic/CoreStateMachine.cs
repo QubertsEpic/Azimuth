@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Azimuth.ClientWrapper.Logic.Args;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace Azimuth.ClientWrapper.Logic
 {
     public abstract class CoreStateMachine
     {
+        public event EventHandler<StateChangedEventArgs>? StateChangedEvent;
         public Dictionary<StateMachine.Event, Dictionary<StateMachine.State, Transition>> RegisteredTransitions = new Dictionary<StateMachine.Event, Dictionary<StateMachine.State, Transition>>();
         public StateMachine.State CurrentState { get; private set; } = StateMachine.State.Start;
 
@@ -25,7 +27,7 @@ namespace Azimuth.ClientWrapper.Logic
                 var trans = RegisteredTransitions[eventToTransition][CurrentState];
                 if (trans.ViaEvents != null)
                 {
-                    return await MultiEventTransition(eventToTransition, trans.ViaEvents);
+                    return await MultiEventTransition(eventToTransition, trans.ViaEvents, trans.ToState);
                 }
                 else
                 {
@@ -49,6 +51,7 @@ namespace Azimuth.ClientWrapper.Logic
             if (newState.HasValue)
             {
                 CurrentState = newState.Value;
+                StateChangedEvent?.Invoke(this, new(CurrentState, originalState));
             }
             else
             {
@@ -58,7 +61,7 @@ namespace Azimuth.ClientWrapper.Logic
             return successful;
         }
 
-        private async Task<bool> MultiEventTransition(StateMachine.Event originatingEvent, StateMachine.Event[] viaEvents)
+        private async Task<bool> MultiEventTransition(StateMachine.Event originatingEvent, StateMachine.Event[] viaEvents, StateMachine.State newState)
         {
             var originalState = CurrentState;
             var successful = true;
@@ -67,7 +70,14 @@ namespace Azimuth.ClientWrapper.Logic
             {
                 var oldState = CurrentState;
                 successful = await TransitionAsync(via);
+                if (!successful)
+                {
+                    await RevertPreviousState(originalState);
+                    return false;
+                }
             }
+            CurrentState = newState;
+            StateChangedEvent?.Invoke(this, new(CurrentState, originalState));
             return successful;
         }
 
@@ -87,7 +97,7 @@ namespace Azimuth.ClientWrapper.Logic
 
             //This isn't safe, but whatever.
             CurrentState = originalState;
-
+            StateChangedEvent?.Invoke(this, new(CurrentState, originalState));
         }
 
         public void Register(Transition transition)

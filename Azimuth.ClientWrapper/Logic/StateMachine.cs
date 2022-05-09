@@ -16,7 +16,7 @@ namespace Azimuth.ClientWrapper.Logic
         {
             Recording,
             Idle,
-            Replaying,
+            Rewinding,
             Start
         }
 
@@ -44,16 +44,16 @@ namespace Azimuth.ClientWrapper.Logic
             Register(new Transition().From(State.Start).To(State.Recording).Via(Event.Record).Event(Event.RestartRecording));
 
             Register(new Transition().From(State.Idle).To(State.Recording).Event(Event.Record).Do(StartRecording));
-            Register(new Transition().From(State.Replaying).To(State.Recording).Event(Event.Record).Via(Event.StopRewinding, Event.Record));
+            Register(new Transition().From(State.Rewinding).To(State.Recording).Event(Event.Record).Via(Event.StopRewinding, Event.Record));
             Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.RestartRecording).Via(Event.StopRecording, Event.ResetRecordings, Event.Record));
             Register(new Transition().From(State.Recording).To(State.Recording).Event(Event.Record));
 
-            Register(new Transition().From(State.Idle).To(State.Replaying).Event(Event.Rewind).Do(StartRewinding));
-            Register(new Transition().From(State.Recording).To(State.Replaying).Event(Event.Rewind).Via(Event.StopRecording, Event.Rewind));
-            Register(new Transition().From(State.Replaying).To(State.Replaying).Event(Event.Rewind));
+            Register(new Transition().From(State.Idle).To(State.Rewinding).Event(Event.Rewind).Do(StartRewinding));
+            Register(new Transition().From(State.Recording).To(State.Rewinding).Event(Event.Rewind).Via(Event.StopRecording, Event.Rewind));
+            Register(new Transition().From(State.Rewinding).To(State.Rewinding).Event(Event.Rewind));
 
             Register(new Transition().From(State.Idle).To(State.Idle).Event(Event.ResetRecordings).Do(ResetRecordings));
-            Register(new Transition().From(State.Replaying).To(State.Idle).Event(Event.StopRewinding).Do(StopReplaying));
+            Register(new Transition().From(State.Rewinding).To(State.Idle).Event(Event.StopRewinding).Do(StopReplaying));
             Register(new Transition().From(State.Recording).To(State.Idle).Event(Event.StopRecording).Do(StopRecording));
         }
 
