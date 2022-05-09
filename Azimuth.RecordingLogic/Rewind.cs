@@ -126,12 +126,12 @@ namespace Azimuth.RecordingLogic
                     return;
                 }
 
-                long currenTime = (long)((startingTime - (Watch.ElapsedMilliseconds - replayCorrection.Value)) * RewindRate);
+                long currentTime = (long)((startingTime - (Watch.ElapsedMilliseconds - replayCorrection.Value)) * RewindRate);
                 try
                 {
-                    while (ReplayTime < frameTime)
+                    while (currentTime < frameTime)
                     {
-                        FrameFinished?.Invoke(this, new(CurrentFrame, ReplayTime));
+                        FrameFinished?.Invoke(this, new(CurrentFrame, currentTime));
                         CurrentFrame -= 1;
 
                         if (CurrentFrame < 0)
@@ -156,7 +156,7 @@ namespace Azimuth.RecordingLogic
                 
                 if (position.HasValue && lastPosition.HasValue)
                 {
-                    MoveCraft(position, frameTime, lastPosition, lastTime, ReplayTime.Value);
+                    MoveCraft(position, frameTime, lastPosition, lastTime, currentTime);
                 }
             }
         }
@@ -165,7 +165,6 @@ namespace Azimuth.RecordingLogic
         {
             ReplayTime = null;
 
-            ReplayStopped?.Invoke(this, new());
             RemoveReferences();
         }
 

@@ -168,7 +168,6 @@ namespace FlighRewindClientWrapper
             if (_rewinder != null)
             {
                 _rewinder.FrameFinished += FrameChanged;
-                _rewinder.ReplayStopped += _rewinder_ReplayStopped;
             }
             if (_stateMachine != null)
             {
@@ -192,7 +191,6 @@ namespace FlighRewindClientWrapper
             }
         }
 
-        private async void _rewinder_ReplayStopped(object? sender, EventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Record);
 
 
         public void FrameChanged(object? sender, ReplayFrameChangedEventArgs args)
