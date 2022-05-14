@@ -20,7 +20,7 @@ namespace Azimuth.RecordingLogic
 
         private bool linked = false;
 
-        private long EndingTime;
+        private long EndingTime = -1;
         private long PauseTime = 0;
         private long OffsetCorrection = 0;
         private Connection connectionInstance;
@@ -49,6 +49,7 @@ namespace Azimuth.RecordingLogic
                     connectionInstance.LocationChanged += OnLocationUpdated;
                     linked = true;
                 }
+            
             }
             else
             {
