@@ -126,7 +126,7 @@ namespace Azimuth.RecordingLogic
                     return;
                 }
 
-                long currentTime = (long)((startingTime - (Watch.ElapsedMilliseconds - replayCorrection.Value)) * RewindRate);
+                long currentTime = (long)(startingTime - ((Watch.ElapsedMilliseconds - replayCorrection.Value) * RewindRate));
                 try
                 {
                     while (currentTime < frameTime)
@@ -164,7 +164,7 @@ namespace Azimuth.RecordingLogic
         public void AbortReplay()
         {
             ReplayTime = null;
-
+            ReplayStopped?.Invoke(this, new());
             RemoveReferences();
         }
 

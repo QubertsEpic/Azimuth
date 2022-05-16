@@ -37,7 +37,7 @@
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock VerticalAlignment="Center" Text="Replay Rate: " HorizontalAlignment="Center"/>
-                <Button x:Name="ReplayRateButton" Margin="1,0,0,0" Content="x0.5" Grid.Column="1">
+                <Button x:Name="ReplayRateButton" Margin="1,0,0,0" Content="x1" Grid.Column="1">
                     <Button.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="x0.5" Click="MenuItem_Click"/>

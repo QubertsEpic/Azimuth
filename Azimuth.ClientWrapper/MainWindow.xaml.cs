@@ -115,10 +115,14 @@ namespace FlighRewindClientWrapper
 
         private void _stateMachine_StateChangedEvent(object? sender, Azimuth.ClientWrapper.Logic.Args.StateChangedEventArgs e)
         {
-            if (e != null)
+            Dispatcher.BeginInvoke(() => 
             {
-                State = e.StateName;
-            }
+                if (e != null)
+                {
+                    State = e.StateName;
+                }
+            });
+           
         }
 
         private void SetButtonStatus(bool status)
@@ -168,11 +172,17 @@ namespace FlighRewindClientWrapper
             if (_rewinder != null)
             {
                 _rewinder.FrameFinished += FrameChanged;
+                _rewinder.ReplayStopped += _rewinder_ReplayStopped;
             }
             if (_stateMachine != null)
             {
                 _stateMachine.StateChangedEvent += _stateMachine_StateChangedEvent;
             }
+        }
+
+        private async void _rewinder_ReplayStopped(object? sender, EventArgs e)
+        {
+            await _stateMachine.TransitionAsync(StateMachine.Event.Record);
         }
 
         private async void RestartButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.RestartRecording);
