@@ -26,15 +26,15 @@ namespace Azimuth.ClientWrapper.Logic
             return this;
         }
 
-        public Transition Do(Func<bool> function)
+        public Transition Do(params Func<bool>[] functions)
         {
-            Actions.Add(function);
+            Actions.AddRange(functions);
             return this;
         }
 
-        public Transition Do(Func<Task<bool>> function)
+        public Transition Do(params Func<Task<bool>>[] functions)
         {
-            Actions.Add(function);
+            Actions.AddRange(functions);
             return this;
         }
 

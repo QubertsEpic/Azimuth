@@ -12,10 +12,13 @@ namespace Azimuth.Classes
     {
         public PositionStruct Position;
         public long Time;
-        public RecordedFrame(PositionStruct position, long deltaTime)
+        /// <summary>
+        /// Span is the time between the last frame and this one.
+        /// </summary>
+        public RecordedFrame(PositionStruct position, long time)
         {
             Position = position;
-            this.Time = deltaTime;
+            this.Time = time;
         }
     }
 }

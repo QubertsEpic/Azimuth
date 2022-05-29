@@ -63,10 +63,10 @@ namespace Azimuth.RecordingLogic
 
         public void StartRecording()
         {
-            if (ListOfFrames != null && ListOfFrames.Any() == true)
-                OffsetCorrection += watch.ElapsedMilliseconds - (ListOfFrames[ListOfFrames.Count - 1].Time);
+            if (ListOfFrames?.Any() == true)
+                OffsetCorrection = watch.ElapsedMilliseconds - (ListOfFrames[ListOfFrames.Count - 1].Time);
             else
-                OffsetCorrection = 0;
+                OffsetCorrection = watch.ElapsedMilliseconds;
             ChangeEvents(true);
             RecordingStarted?.Invoke(this, new());
         }
@@ -100,6 +100,7 @@ namespace Azimuth.RecordingLogic
                 throw new IndexOutOfRangeException("Cannot access index to make modifications.");
             if (ListOfFrames != null)
             {
+                RecorderUpdated?.Invoke(this, new(ListOfFrames[index], ListOfFrames.Count-1));
                 ListOfFrames.RemoveAt(index);
             }
         }

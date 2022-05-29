@@ -35,7 +35,6 @@ namespace FlighRewindClientWrapper
             }
         }
 
-        const string Idle = "Idle", Recording = "Recording", Rewinding = "Rewinding";
 
         public MainWindow()
         {
@@ -115,14 +114,11 @@ namespace FlighRewindClientWrapper
 
         private void _stateMachine_StateChangedEvent(object? sender, Azimuth.ClientWrapper.Logic.Args.StateChangedEventArgs e)
         {
-            Dispatcher.BeginInvoke(() => 
+            Dispatcher.BeginInvoke(() =>
             {
-                if (e != null)
-                {
-                    State = e.StateName;
-                }
+                State = e.StateName;
             });
-           
+
         }
 
         private void SetButtonStatus(bool status)
@@ -148,7 +144,8 @@ namespace FlighRewindClientWrapper
             }
         }
 
-        //Make a method for rewinding, stop recording, dump the data and start playing it in reverse.
+        //Make a method for rewinding, stop recording, dump the data and start
+        //it in reverse.
 
         public void RegisterHotkeys()
         {
@@ -188,16 +185,16 @@ namespace FlighRewindClientWrapper
         private async void RestartButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.RestartRecording);
 
         private async void ReplayButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Rewind);
-        private async void ReplayStopButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.StopRewinding);
+        private async void ReplayStopButtonClick(object sender, RoutedEventArgs e) => await _stateMachine.TransitionAsync(StateMachine.Event.Record);
         private void Window_Loaded(object sender, RoutedEventArgs e) => InitSetup();
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if((sender as MenuItem)?.Header is string header && double.TryParse(header.Substring(1), out var rate))
+            if ((sender as MenuItem)?.Header is string header && double.TryParse(header.Substring(1), out var rate))
             {
                 ReplayRateButton.Content = header;
-                if(_rewinder != null)
-                    _rewinder.RewindRate = rate;
+                if (_rewinder != null)
+                    _rewinder.RewindRate = rate * -1;
             }
         }
 
